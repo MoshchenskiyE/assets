@@ -1,26 +1,28 @@
 # RoadReady MA 🚗
 
-A **free**, Duolingo-style course for learning **Massachusetts driving rules**.
-Bite-sized lessons on a gamified learning path — earn XP, keep a streak, and
-don't run out of hearts!
+The **free**, beautiful way to ace the **Massachusetts permit test** — a
+Duolingo-style course plus a real-format exam simulator, road signs, and
+progress tracking. Designed to beat the paid App Store leaders (see
+[`ANALYSIS.md`](./ANALYSIS.md)).
+
+## What's inside
+
+- 🏠 **Learn** — bite-sized lessons on a gamified path with XP, streaks and hearts.
+- 📝 **Exam Simulator** — the real MA RMV format: **25 questions, 25-minute
+  timer, pass at 18/72%**, with a full answer review at the end.
+- 🛑 **Road Signs** — crisp vector signs (regulatory / warning / guide) with a
+  tap-to-learn gallery and a "Test Me" recognition quiz.
+- 🎯 **Smart Review** — every missed question is remembered for one-tap practice.
+- 👤 **Profile** — daily-goal ring, streak/XP/lesson KPIs, mastery-by-unit bars,
+  and settings: **Dark Mode**, sound effects, and haptics.
+- 📱 Native-app feel: bottom tab bar, 60 fps animations, confetti, safe-area
+  insets, reduced-motion + accessibility support.
+- 💾 Saves on-device · works fully offline · **no ads, no account, no paywall.**
 
 > ⚠️ **Educational use only — not legal advice.** Content is summarized from the
 > Massachusetts Driver's Manual (RMV), the Massachusetts General Laws
 > (Chapters 85, 89 & 90), and 720 CMR. Always verify against the official
 > [Massachusetts RMV](https://www.mass.gov/rmv).
-
-## Features
-
-- 🗺️ **Learning path** — 13 lessons across 4 themed units, with locked/unlocked
-  nodes just like a language-learning app.
-- 🎮 **Gamified** — XP, day streak, and a 5-heart lives system (hearts refill
-  over time). Lose all your hearts and the lesson resets.
-- ✅ **Instant feedback** — answer, check, and learn why, with the green/red
-  feedback dock and a celebratory completion screen + confetti.
-- 📖 **Quick Reference** — tap any topic to pop open the underlying rules with
-  statute citations.
-- 💾 **Saves your progress** locally (localStorage) — works fully offline.
-- 🚀 **Zero dependencies, no build step, no tracking, no cost.**
 
 ## Run it
 
@@ -38,17 +40,22 @@ file — open it directly in any mobile browser, no server or network needed.
 
 ## Files
 
-| File                              | Purpose                                            |
-| --------------------------------- | -------------------------------------------------- |
-| `index.html`                      | App shell (top bar, screens, modal)                |
-| `styles.css`                      | Duolingo-inspired design system                    |
-| `app.js`                          | Path, lesson engine, XP/hearts/streak, persistence |
-| `data.js`                         | Course content: units → lessons → questions        |
-| `ma-traffic-rules-standalone.html`| Single-file build for offline / mobile use         |
+| File                              | Purpose                                                    |
+| --------------------------------- | ---------------------------------------------------------- |
+| `index.html`                      | App shell: top bar, tab screens, overlays, modals          |
+| `styles.css`                      | Design system + Dark Mode, bottom nav, exam/signs/profile  |
+| `app.js`                          | Tabs, multi-mode quiz engine, signs, profile, FX, storage  |
+| `data.js`                         | Content: units → lessons → questions, road signs, exam pool |
+| `ma-traffic-rules-standalone.html`| Single-file build for offline / mobile use                 |
+| `ANALYSIS.md`                     | Competitive analysis & UX strategy                         |
 
 ## Updating the content
 
-All course content lives in `data.js` as `UNITS → lessons → questions`. Add a
-lesson by appending to a unit's `lessons` array; add a question by appending to a
-lesson's `questions` array (`answer` is the 0-based index of the correct option).
-Then rebuild the standalone file if you use it.
+All content lives in `data.js`: course as `UNITS → lessons → questions`, plus
+`SIGNS` and an `EXTRA_QUESTIONS` pool the Exam Simulator draws from (`answer` is
+the 0-based index of the correct option). Then rebuild the standalone file:
+
+```bash
+# regenerates ma-traffic-rules-standalone.html from the source files
+node -e 'const fs=require("fs");let h=fs.readFileSync("index.html","utf8");h=h.replace(/\s*<link rel="stylesheet" href="styles.css" \/>/,"\n<style>\n"+fs.readFileSync("styles.css","utf8")+"\n</style>").replace(/\s*<script src="data.js"><\/script>\s*<script src="app.js"><\/script>/,"\n<script>\n"+fs.readFileSync("data.js","utf8")+"\n"+fs.readFileSync("app.js","utf8")+"\n</script>");fs.writeFileSync("ma-traffic-rules-standalone.html",h)'
+```

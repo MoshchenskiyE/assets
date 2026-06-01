@@ -2,13 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#58cc02" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0" />
+    <meta name="theme-color" content="#58cc02" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131f24" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta
       name="description"
-      content="Learn Massachusetts driving rules the fun way — a free, gamified course with lessons, XP and streaks."
+      content="RoadReady MA — the free, beautiful way to ace the Massachusetts permit test. Lessons, a real-format exam simulator, road signs, and progress tracking."
     />
-    <title>RoadReady MA · Learn Massachusetts Driving Rules</title>
+    <title>RoadReady MA · Ace the Massachusetts Permit Test</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,104 +26,161 @@
   </head>
   <body>
     <!-- ============ TOP BAR ============ -->
-    <header class="topbar">
+    <header class="topbar" id="topbar">
       <div class="topbar-inner">
         <div class="brand">
           <span class="brand-logo" aria-hidden="true">🚗</span>
           <span class="brand-name">RoadReady <b>MA</b></span>
         </div>
-        <div class="stats" id="stats">
-          <div class="stat streak" title="Day streak">
-            <span class="stat-ico">🔥</span><span id="statStreak">0</span>
-          </div>
-          <div class="stat xp" title="Total XP">
-            <span class="stat-ico">⭐</span><span id="statXp">0</span>
-          </div>
-          <div class="stat hearts" title="Hearts">
-            <span class="stat-ico">❤️</span><span id="statHearts">5</span>
-          </div>
+        <div class="stats">
+          <div class="stat streak" title="Day streak"><span class="stat-ico">🔥</span><span id="statStreak">0</span></div>
+          <div class="stat xp" title="Total XP"><span class="stat-ico">⭐</span><span id="statXp">0</span></div>
         </div>
       </div>
     </header>
 
-    <main>
-      <!-- ============ HOME / LEARNING PATH ============ -->
-      <section id="screen-home" class="screen is-active">
+    <main id="main">
+      <!-- ======================= LEARN TAB ======================= -->
+      <section id="tab-learn" class="tab-screen is-active">
         <div class="path" id="path"></div>
-
         <section class="guide-block">
-          <h2 class="guide-title">📖 Quick Reference</h2>
-          <p class="guide-sub">Tap any topic to review the rules anytime.</p>
+          <h2 class="section-title">📖 Quick Reference</h2>
+          <p class="section-sub">Tap any topic to review the rules anytime.</p>
           <div class="guide-grid" id="guideGrid"></div>
         </section>
-
         <footer class="home-footer">
-          <p>
-            🆓 100% free. Educational only — not legal advice. Verify at the
-            <a href="https://www.mass.gov/rmv" target="_blank" rel="noopener">Mass RMV</a>.
-          </p>
+          <p>🆓 100% free · no ads · no account. Educational only — verify at the
+            <a href="https://www.mass.gov/rmv" target="_blank" rel="noopener">Mass RMV</a>.</p>
         </footer>
       </section>
 
-      <!-- ============ LESSON ============ -->
-      <section id="screen-lesson" class="screen">
-        <div class="lesson-top">
-          <button class="icon-btn" id="lessonQuit" aria-label="Quit lesson">✕</button>
-          <div class="lesson-progress"><span id="lessonProgressFill"></span></div>
-          <div class="lesson-hearts"><span class="stat-ico">❤️</span><span id="lessonHearts">5</span></div>
-        </div>
-
-        <div class="lesson-body">
-          <h2 class="lesson-prompt" id="lessonPrompt">Select the correct answer</h2>
-          <div class="lesson-card" id="lessonCard"></div>
-          <h3 class="lesson-question" id="lessonQuestion"></h3>
-          <div class="lesson-options" id="lessonOptions"></div>
-        </div>
-
-        <!-- Feedback dock -->
-        <div class="dock" id="dock">
-          <div class="dock-inner">
-            <div class="dock-msg" id="dockMsg"></div>
-            <button class="btn3d btn-check" id="checkBtn" disabled>CHECK</button>
+      <!-- ======================= EXAM TAB ======================= -->
+      <section id="tab-exam" class="tab-screen">
+        <div class="pad">
+          <div class="hero-card exam-hero">
+            <div class="hero-emoji">📝</div>
+            <h2>Exam Simulator</h2>
+            <p>Real MA RMV format: <b>25 questions</b>, <b>25 minutes</b>, pass at
+              <b>18 correct (72%)</b>. No hints — just like the real thing.</p>
+            <button class="btn3d btn-blue" id="startExam">START EXAM</button>
           </div>
+
+          <div class="stat-row">
+            <div class="mini-stat"><span class="mini-label">BEST SCORE</span><span class="mini-value" id="examBest">—</span></div>
+            <div class="mini-stat"><span class="mini-label">EXAMS TAKEN</span><span class="mini-value" id="examCount">0</span></div>
+            <div class="mini-stat"><span class="mini-label">RESULT</span><span class="mini-value" id="examStatus">—</span></div>
+          </div>
+
+          <button class="review-card" id="reviewMistakes" hidden>
+            <div class="rc-ico">🎯</div>
+            <div class="rc-body">
+              <b>Practice your mistakes</b>
+              <span id="reviewCount">0 questions to review</span>
+            </div>
+            <span class="rc-chev">›</span>
+          </button>
         </div>
       </section>
 
-      <!-- ============ LESSON COMPLETE ============ -->
-      <section id="screen-complete" class="screen">
-        <div class="complete-wrap">
-          <div class="confetti" id="confetti"></div>
-          <div class="complete-emoji">🎉</div>
-          <h2 class="complete-title">Lesson complete!</h2>
-          <div class="complete-badges">
-            <div class="badge xp-badge">
-              <span class="badge-label">TOTAL XP</span>
-              <span class="badge-value" id="completeXp">+0</span>
+      <!-- ======================= SIGNS TAB ======================= -->
+      <section id="tab-signs" class="tab-screen">
+        <div class="pad">
+          <div class="signs-head">
+            <div>
+              <h2 class="section-title">🛑 Road Signs</h2>
+              <p class="section-sub">Tap a sign to learn its meaning.</p>
             </div>
-            <div class="badge acc-badge">
-              <span class="badge-label">ACCURACY</span>
-              <span class="badge-value" id="completeAcc">0%</span>
-            </div>
+            <button class="btn3d btn-purple btn-sm" id="startSignQuiz">TEST ME</button>
           </div>
-          <button class="btn3d btn-continue" id="completeContinue">CONTINUE</button>
+          <div id="signsContainer"></div>
         </div>
       </section>
 
-      <!-- ============ OUT OF HEARTS ============ -->
-      <section id="screen-failed" class="screen">
-        <div class="complete-wrap">
-          <div class="complete-emoji">💔</div>
-          <h2 class="complete-title">Out of hearts</h2>
-          <p class="failed-text">
-            You ran out of hearts. Hearts refill over time — take a breather and
-            try this lesson again.
+      <!-- ======================= PROFILE TAB ======================= -->
+      <section id="tab-profile" class="tab-screen">
+        <div class="pad">
+          <div class="profile-head">
+            <div class="profile-ring" id="goalRing">
+              <span class="ring-emoji">🚗</span>
+            </div>
+            <div>
+              <h2 class="profile-name">Your progress</h2>
+              <p class="profile-sub" id="goalText">Daily goal</p>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi"><span class="kpi-ico">🔥</span><span class="kpi-num" id="kpiStreak">0</span><span class="kpi-lab">Day streak</span></div>
+            <div class="kpi"><span class="kpi-ico">⭐</span><span class="kpi-num" id="kpiXp">0</span><span class="kpi-lab">Total XP</span></div>
+            <div class="kpi"><span class="kpi-ico">✅</span><span class="kpi-num" id="kpiLessons">0</span><span class="kpi-lab">Lessons</span></div>
+            <div class="kpi"><span class="kpi-ico">🏆</span><span class="kpi-num" id="kpiExam">—</span><span class="kpi-lab">Best exam</span></div>
+          </div>
+
+          <h3 class="section-title sm">Mastery by unit</h3>
+          <div id="masteryList" class="mastery-list"></div>
+
+          <h3 class="section-title sm">Settings</h3>
+          <div class="settings">
+            <label class="setting"><span>🌙 Dark mode</span><input type="checkbox" id="setDark" class="switch" /></label>
+            <label class="setting"><span>🔊 Sound effects</span><input type="checkbox" id="setSound" class="switch" /></label>
+            <label class="setting"><span>📳 Haptics</span><input type="checkbox" id="setHaptics" class="switch" /></label>
+            <button class="reset-btn" id="resetBtn">Reset all progress</button>
+          </div>
+
+          <p class="disclaimer">
+            ⚠️ Educational use only — not legal advice. Content summarized from the
+            MA Driver's Manual & M.G.L. c. 85/89/90. Verify at the
+            <a href="https://www.mass.gov/rmv" target="_blank" rel="noopener">Mass RMV</a>.
           </p>
-          <button class="btn3d btn-continue" id="failedContinue">BACK TO PATH</button>
         </div>
       </section>
     </main>
 
-    <!-- ============ REFERENCE MODAL ============ -->
+    <!-- ======================= BOTTOM NAV ======================= -->
+    <nav class="tabbar" id="tabbar">
+      <button class="tabbtn is-active" data-tab="learn"><span class="tb-ico">🏠</span><span>Learn</span></button>
+      <button class="tabbtn" data-tab="exam"><span class="tb-ico">📝</span><span>Exam</span></button>
+      <button class="tabbtn" data-tab="signs"><span class="tb-ico">🛑</span><span>Signs</span></button>
+      <button class="tabbtn" data-tab="profile"><span class="tb-ico">👤</span><span>Profile</span></button>
+    </nav>
+
+    <!-- ======================= OVERLAY: LESSON / EXAM RUN ======================= -->
+    <section id="overlay-quiz" class="overlay">
+      <div class="quiz-top">
+        <button class="icon-btn" id="quizQuit" aria-label="Quit">✕</button>
+        <div class="quiz-progress"><span id="quizProgressFill"></span></div>
+        <div class="quiz-meta" id="quizMeta"></div>
+      </div>
+      <div class="quiz-body">
+        <h2 class="quiz-prompt" id="quizPrompt">Select the correct answer</h2>
+        <div class="quiz-figure" id="quizFigure"></div>
+        <h3 class="quiz-question" id="quizQuestion"></h3>
+        <div class="quiz-options" id="quizOptions"></div>
+      </div>
+      <div class="dock" id="dock">
+        <div class="dock-inner">
+          <div class="dock-msg" id="dockMsg"></div>
+          <button class="btn3d btn-check" id="checkBtn" disabled>CHECK</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= OVERLAY: RESULT ======================= -->
+    <section id="overlay-result" class="overlay center">
+      <div class="result-wrap">
+        <div class="confetti" id="confetti"></div>
+        <div class="result-emoji" id="resultEmoji">🎉</div>
+        <h2 class="result-title" id="resultTitle">Lesson complete!</h2>
+        <p class="result-sub" id="resultSub"></p>
+        <div class="result-badges" id="resultBadges"></div>
+        <div class="result-actions">
+          <button class="btn3d btn-ghost" id="resultReview" hidden>REVIEW ANSWERS</button>
+          <button class="btn3d btn-continue" id="resultContinue">CONTINUE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= MODAL: REFERENCE / SIGN ======================= -->
     <div class="modal" id="modal" hidden>
       <div class="modal-card" role="dialog" aria-modal="true">
         <button class="icon-btn modal-close" id="modalClose" aria-label="Close">✕</button>
@@ -128,8 +188,18 @@
           <span class="modal-ico" id="modalIco">📖</span>
           <h3 id="modalTitle">Rule</h3>
         </div>
+        <div id="modalFigure"></div>
         <ul class="modal-points" id="modalPoints"></ul>
         <div class="modal-ref" id="modalRef"></div>
+      </div>
+    </div>
+
+    <!-- ======================= MODAL: REVIEW LIST ======================= -->
+    <div class="modal" id="reviewModal" hidden>
+      <div class="modal-card tall" role="dialog" aria-modal="true">
+        <button class="icon-btn modal-close" id="reviewClose" aria-label="Close">✕</button>
+        <div class="modal-head"><span class="modal-ico">📋</span><h3>Answer review</h3></div>
+        <div id="reviewList" class="review-list"></div>
       </div>
     </div>
 

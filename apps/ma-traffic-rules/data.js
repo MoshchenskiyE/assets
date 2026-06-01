@@ -640,6 +640,81 @@ const UNITS = [
   },
 ];
 
+/* ===================================================================
+   ROAD SIGNS — rendered as vector shapes (see renderSign in app.js)
+   shape: octagon | triangle | rect | circle | diamond | pentagon
+   =================================================================== */
+const SIGNS = [
+  { id: "stop", name: "Stop", cat: "Regulatory", shape: "octagon", color: "#e3262e", fg: "#fff", text: "STOP",
+    meaning: "Come to a COMPLETE stop. Yield to traffic and pedestrians, then proceed when safe." },
+  { id: "yield", name: "Yield", cat: "Regulatory", shape: "triangle", color: "#e3262e", fg: "#fff", text: "YIELD",
+    meaning: "Slow down and give the right of way to traffic and pedestrians ahead." },
+  { id: "speed", name: "Speed Limit", cat: "Regulatory", shape: "rect", color: "#fff", fg: "#222", text: "SPEED\nLIMIT\n30",
+    meaning: "Maximum legal speed in ideal conditions. Drive slower in poor weather or traffic." },
+  { id: "donotenter", name: "Do Not Enter", cat: "Regulatory", shape: "circle", color: "#e3262e", fg: "#fff", glyph: "bar",
+    meaning: "Do not enter — wrong way. Used at one-way streets and freeway off-ramps." },
+  { id: "wrongway", name: "Wrong Way", cat: "Regulatory", shape: "rect", color: "#e3262e", fg: "#fff", text: "WRONG\nWAY",
+    meaning: "You are travelling against traffic. Turn around immediately and exit safely." },
+  { id: "oneway", name: "One Way", cat: "Regulatory", shape: "rect", color: "#222", fg: "#fff", glyph: "arrow",
+    meaning: "Traffic flows only in the direction of the arrow." },
+  { id: "nouturn", name: "No U-Turn", cat: "Regulatory", shape: "rect", color: "#fff", fg: "#222", glyph: "nouturn",
+    meaning: "U-turns are prohibited at this location." },
+  { id: "railroad", name: "Railroad Crossing", cat: "Warning", shape: "circle", color: "#f6c700", fg: "#222", glyph: "rxr",
+    meaning: "Railroad tracks ahead. Slow down, look and listen, be prepared to stop." },
+  { id: "pedestrian", name: "Pedestrian Crossing", cat: "Warning", shape: "diamond", color: "#f6c700", fg: "#222", glyph: "🚶",
+    meaning: "Watch for people crossing. Be ready to stop and yield to pedestrians." },
+  { id: "school", name: "School Zone", cat: "Warning", shape: "pentagon", color: "#8cd600", fg: "#222", glyph: "🚸",
+    meaning: "School area — children present. Slow down and obey reduced limits and crossing guards." },
+  { id: "signal", name: "Signal Ahead", cat: "Warning", shape: "diamond", color: "#f6c700", fg: "#222", glyph: "🚦",
+    meaning: "A traffic signal is ahead. Slow down and be prepared to stop." },
+  { id: "slippery", name: "Slippery When Wet", cat: "Warning", shape: "diamond", color: "#f6c700", fg: "#222", glyph: "🌧️",
+    meaning: "Road may be slick in rain/snow. Reduce speed and avoid hard braking." },
+  { id: "workzone", name: "Work Zone", cat: "Warning", shape: "diamond", color: "#ff7a18", fg: "#fff", glyph: "🚧",
+    meaning: "Road work ahead. Slow down, fines double, watch for workers and equipment." },
+  { id: "merge", name: "Merge", cat: "Warning", shape: "diamond", color: "#f6c700", fg: "#222", glyph: "merge",
+    meaning: "Traffic merges ahead. Adjust speed and position to let vehicles blend safely." },
+  { id: "hospital", name: "Hospital", cat: "Guide", shape: "rect", color: "#1456a0", fg: "#fff", text: "H",
+    meaning: "Directs you to a nearby hospital or medical services." },
+  { id: "parking", name: "No Parking", cat: "Regulatory", shape: "rect", color: "#fff", fg: "#e3262e", glyph: "noparking",
+    meaning: "Parking is prohibited in this zone." },
+];
+
+/* Extra questions to enrich the Exam Simulator pool (incl. sign recognition). */
+const EXTRA_QUESTIONS = [
+  { q: "A red octagonal sign means…", options: ["Yield", "Stop", "Caution", "Do not enter"], answer: 1,
+    explain: "An octagon is always a STOP sign — come to a complete stop." },
+  { q: "An upside-down triangle sign means…", options: ["Stop", "Merge", "Yield", "Dead end"], answer: 2,
+    explain: "An inverted triangle is a YIELD sign — give the right of way." },
+  { q: "A yellow diamond-shaped sign is a…", options: ["Regulatory sign", "Warning sign", "Guide sign", "Service sign"], answer: 1,
+    explain: "Yellow diamonds are WARNING signs alerting you to road conditions ahead." },
+  { q: "A round yellow sign with an 'X' and 'RR' warns of…", options: ["A rest area", "A railroad crossing", "A roundabout", "A runaway ramp"], answer: 1,
+    explain: "It warns of a railroad crossing — slow down, look and listen." },
+  { q: "A red circle with a white horizontal bar means…", options: ["One way", "Do not enter", "No passing", "Road closed to trucks"], answer: 1,
+    explain: "It is a DO NOT ENTER sign — you're heading the wrong way." },
+  { q: "Orange signs and cones indicate…", options: ["A school zone", "A work/construction zone", "A scenic route", "A bike lane"], answer: 1,
+    explain: "Orange means a construction or work zone — slow down, fines double." },
+  { q: "A blue sign generally provides…", options: ["Warnings", "Motorist services and guidance", "Speed limits", "Prohibitions"], answer: 1,
+    explain: "Blue signs give motorist services/guidance (hospitals, rest areas, food)." },
+  { q: "When approaching a yellow 'Signal Ahead' sign you should…", options: ["Speed up", "Slow down and be ready to stop", "Turn around", "Ignore it"], answer: 1,
+    explain: "A signal is ahead — slow down and prepare to stop." },
+  { q: "Solid double yellow lines in the center of the road mean…", options: ["Passing allowed both ways", "No passing in either direction", "One-way street", "Parking lane"], answer: 1,
+    explain: "Double solid yellow lines mean passing is prohibited in both directions." },
+  { q: "A flashing yellow arrow on a left-turn signal means…", options: ["Protected turn", "Turn is prohibited", "Turn allowed after yielding to oncoming traffic", "Stop"], answer: 2,
+    explain: "Flashing yellow arrow: you may turn left after yielding to oncoming traffic and pedestrians." },
+  { q: "What should you do at a green light with pedestrians in the crosswalk?", options: ["Proceed, you have priority", "Yield to the pedestrians", "Honk", "Reverse"], answer: 1,
+    explain: "Even on green, you must yield to pedestrians already in the crosswalk." },
+  { q: "The safe following distance in good conditions is at least…", options: ["1 second", "2 seconds", "3 seconds", "Half a second"], answer: 2,
+    explain: "Use the 3-second rule; increase it in rain, snow, or fog." },
+  { q: "If your vehicle starts to skid, you should…", options: ["Brake hard", "Steer in the direction you want the front to go", "Accelerate", "Close your eyes"], answer: 1,
+    explain: "Ease off the gas and steer gently where you want the front of the car to go." },
+  { q: "When may you drive in a bicycle lane?", options: ["Anytime to pass", "Only briefly when turning, after yielding to cyclists", "Never under any condition", "During rush hour"], answer: 1,
+    explain: "You may only enter a bike lane briefly to make a turn, yielding to cyclists." },
+  { q: "Headlights must be on…", options: ["Only at night", "From 30 min after sunset to 30 min before sunrise, and whenever wipers are on", "Only in tunnels", "Only on highways"], answer: 1,
+    explain: "Lights on at night and whenever weather requires your wipers ('Wipers On, Lights On')." },
+  { q: "A steady yellow traffic light means…", options: ["Speed up to beat the red", "Stop if you can do so safely; red is next", "Go", "Yield only"], answer: 1,
+    explain: "Steady yellow warns the light is about to turn red — stop if you safely can." },
+];
+
 if (typeof module !== "undefined") {
-  module.exports = { UNITS };
+  module.exports = { UNITS, SIGNS, EXTRA_QUESTIONS };
 }
