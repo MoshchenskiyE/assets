@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A quick reference and practice quiz for Massachusetts traffic rules and driving laws."
+    />
+    <title>Massachusetts Traffic Rules</title>
+    <style>
+:root {
+  --navy: #14558f;       /* Massachusetts-flag blue */
+  --navy-dark: #0e3c66;
+  --gold: #d4a017;
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --ink: #1c2733;
+  --muted: #5a6b7b;
+  --line: #e2e8f0;
+  --good: #1f8a4c;
+  --bad: #c0392b;
+  --shadow: 0 2px 8px rgba(20, 41, 66, 0.08);
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--navy), var(--navy-dark));
+  color: #fff;
+  padding: 32px 0 26px;
+  border-bottom: 4px solid var(--gold);
+}
+.header-inner h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  letter-spacing: -0.01em;
+}
+.tagline {
+  margin: 6px 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: -1px;
+  padding-top: 12px;
+  flex-wrap: wrap;
+}
+.tab {
+  border: none;
+  background: transparent;
+  padding: 10px 16px;
+  font-size: 0.98rem;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+.tab:hover {
+  background: #e8edf3;
+  color: var(--ink);
+}
+.tab.is-active {
+  background: var(--card);
+  color: var(--navy);
+  box-shadow: var(--shadow);
+}
+
+/* Views */
+.view {
+  display: none;
+  padding: 22px 0 40px;
+}
+.view.is-active {
+  display: block;
+}
+
+/* Controls */
+.controls {
+  margin-bottom: 14px;
+}
+.search {
+  width: 100%;
+  padding: 13px 16px;
+  font-size: 1rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  transition: border-color 0.15s;
+}
+.search:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.chip:hover {
+  border-color: var(--navy);
+}
+.chip.is-active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.result-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 4px 2px 12px;
+}
+
+/* Rule cards */
+.rules-list {
+  display: grid;
+  gap: 14px;
+}
+.rule-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.rule-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+.rule-head:hover {
+  background: #fafbfd;
+}
+.rule-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.rule-headtext {
+  flex: 1;
+}
+.rule-cat {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--navy);
+  font-weight: 700;
+}
+.rule-title {
+  margin: 2px 0;
+  font-size: 1.08rem;
+}
+.rule-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.rule-toggle {
+  color: var(--muted);
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+.rule-card.is-open .rule-toggle {
+  transform: rotate(180deg);
+}
+.rule-body {
+  display: none;
+  padding: 0 18px 18px 18px;
+  border-top: 1px solid var(--line);
+}
+.rule-card.is-open .rule-body {
+  display: block;
+}
+.rule-body ul {
+  margin: 14px 0;
+  padding-left: 20px;
+}
+.rule-body li {
+  margin-bottom: 7px;
+}
+.rule-ref {
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: #f0f3f7;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px;
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--navy-dark);
+}
+
+/* Quiz */
+.quiz-intro,
+.quiz-result,
+.about {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid var(--line);
+}
+.quiz-intro h2,
+.quiz-result h2,
+.about h2 {
+  margin-top: 0;
+}
+.quiz-active {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  border: 1px solid var(--line);
+}
+.quiz-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.quiz-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.quiz-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  width: 0;
+  transition: width 0.3s;
+}
+.quiz-progress-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.question {
+  font-size: 1.25rem;
+  margin: 0 0 18px;
+}
+.answers {
+  display: grid;
+  gap: 10px;
+}
+.answer-btn {
+  text-align: left;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.answer-btn:hover:not(:disabled) {
+  border-color: var(--navy);
+}
+.answer-btn:disabled {
+  cursor: default;
+}
+.answer-btn.correct {
+  border-color: var(--good);
+  background: #e8f6ee;
+}
+.answer-btn.wrong {
+  border-color: var(--bad);
+  background: #fbeae8;
+}
+.feedback {
+  margin: 16px 0 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.feedback.right {
+  background: #e8f6ee;
+  color: var(--good);
+}
+.feedback.wrong {
+  background: #fbeae8;
+  color: var(--bad);
+}
+.score {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin: 8px 0;
+  color: var(--navy);
+}
+.score-message {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+/* About */
+.callout {
+  background: #fff7e0;
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  font-size: 0.95rem;
+}
+.link-list,
+.about p {
+  font-size: 0.97rem;
+}
+.about a {
+  color: var(--navy);
+}
+.version {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 18px;
+}
+
+/* Footer */
+.app-footer {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+  margin-top: 20px;
+}
+.app-footer p {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 540px) {
+  .header-inner h1 {
+    font-size: 1.5rem;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+    </style>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="wrap header-inner">
+        <h1><span aria-hidden="true">🚦</span> Massachusetts Traffic Rules</h1>
+        <p class="tagline">
+          A plain-language reference to the Bay State's driving laws &mdash; with a
+          practice quiz.
+        </p>
+      </div>
+    </header>
+
+    <nav class="tabs wrap" role="tablist">
+      <button class="tab is-active" data-view="rules" role="tab">📖 Rules</button>
+      <button class="tab" data-view="quiz" role="tab">📝 Practice Quiz</button>
+      <button class="tab" data-view="about" role="tab">ℹ️ About</button>
+    </nav>
+
+    <main class="wrap">
+      <!-- RULES VIEW -->
+      <section id="view-rules" class="view is-active">
+        <div class="controls">
+          <input
+            type="search"
+            id="search"
+            class="search"
+            placeholder="Search rules… (e.g. 'parking', 'phone', 'speed')"
+            autocomplete="off"
+          />
+          <div id="categoryFilters" class="chips"></div>
+        </div>
+        <p id="resultCount" class="result-count"></p>
+        <div id="rulesList" class="rules-list"></div>
+        <p id="noResults" class="no-results" hidden>
+          No rules match your search. Try a different term.
+        </p>
+      </section>
+
+      <!-- QUIZ VIEW -->
+      <section id="view-quiz" class="view">
+        <div id="quizIntro" class="quiz-intro">
+          <h2>Test your knowledge</h2>
+          <p>
+            Answer <span id="quizTotal"></span> questions drawn from the
+            Massachusetts Driver's Manual. You need 70% to pass the real RMV exam.
+          </p>
+          <button id="startQuiz" class="btn btn-primary">Start Quiz</button>
+        </div>
+
+        <div id="quizActive" class="quiz-active" hidden>
+          <div class="quiz-progress">
+            <div class="quiz-progress-bar"><span id="progressFill"></span></div>
+            <span id="progressText" class="quiz-progress-text"></span>
+          </div>
+          <h2 id="questionText" class="question"></h2>
+          <div id="answerOptions" class="answers"></div>
+          <p id="feedback" class="feedback" hidden></p>
+          <button id="nextQuestion" class="btn btn-primary" hidden>Next →</button>
+        </div>
+
+        <div id="quizResult" class="quiz-result" hidden>
+          <h2>Your score</h2>
+          <p class="score" id="scoreText"></p>
+          <p id="scoreMessage" class="score-message"></p>
+          <button id="retakeQuiz" class="btn btn-primary">Retake Quiz</button>
+        </div>
+      </section>
+
+      <!-- ABOUT VIEW -->
+      <section id="view-about" class="view">
+        <div class="about">
+          <h2>About this app</h2>
+          <p>
+            This is an educational, plain-language summary of common Massachusetts
+            traffic rules, compiled from the
+            <strong>Massachusetts Driver's Manual</strong> (RMV), the
+            <strong>Massachusetts General Laws</strong> (Chapters 85, 89 &amp; 90),
+            and <strong>720 CMR</strong>.
+          </p>
+          <div class="callout">
+            ⚠️ <strong>Not legal advice.</strong> Laws change and local ordinances
+            vary. Always confirm against the official
+            <a href="https://www.mass.gov/rmv" target="_blank" rel="noopener"
+              >Massachusetts RMV</a
+            >
+            and
+            <a href="https://malegislature.gov" target="_blank" rel="noopener"
+              >Massachusetts General Laws</a
+            >.
+          </div>
+          <h3>Useful links</h3>
+          <ul class="link-list">
+            <li>
+              <a
+                href="https://www.mass.gov/how-to/study-for-your-learners-permit-exam"
+                target="_blank"
+                rel="noopener"
+                >Study for your learner's permit exam</a
+              >
+            </li>
+            <li>
+              <a href="https://www.mass.gov/orgs/massachusetts-registry-of-motor-vehicles" target="_blank" rel="noopener"
+                >Registry of Motor Vehicles (RMV)</a
+              >
+            </li>
+            <li>
+              <a href="https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXIV/Chapter90" target="_blank" rel="noopener"
+                >M.G.L. Chapter 90 — Operation of Motor Vehicles</a
+              >
+            </li>
+          </ul>
+          <p class="version">Reference data last reviewed: 2026 · Educational use only.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="wrap">
+        <p>
+          🚗 Drive safely. This tool is for education only and is not affiliated
+          with the Commonwealth of Massachusetts.
+        </p>
+      </div>
+    </footer>
+    <script>
+/*
+ * Massachusetts Traffic Rules — reference data.
+ *
+ * Sourced from the Massachusetts Driver's Manual (RMV), Massachusetts General
+ * Laws (M.G.L.) Chapter 89 & 90, and 720 CMR. This is an educational summary,
+ * not legal advice. Always verify against the current official manual at
+ * https://www.mass.gov/rmv and the General Laws at https://malegislature.gov.
+ */
+
+const RULES = [
+  {
+    id: "speed-limits",
+    category: "Speed Limits",
+    icon: "🚦",
+    title: "Default (statutory) speed limits",
+    summary:
+      "Unless a posted sign says otherwise, these are the prima facie speed limits in Massachusetts.",
+    details: [
+      "20 mph in a designated thickly settled or business district (a 'safety zone').",
+      "30 mph in a thickly settled or business district (areas with closely spaced homes/buildings).",
+      "40 mph outside a thickly settled or business district for at least 1/8 mile.",
+      "50 mph on divided highways outside thickly settled areas.",
+      "65 mph maximum on most interstate highways where posted.",
+      "Exceeding these limits is prima facie evidence of a violation; you must always drive at a 'reasonable and proper' speed for conditions (M.G.L. c. 90 §17).",
+    ],
+    reference: "M.G.L. c. 90 §17, §18",
+    tags: ["speed", "mph", "thickly settled", "highway", "limit"],
+  },
+  {
+    id: "speed-special-zones",
+    category: "Speed Limits",
+    icon: "🏫",
+    title: "School zones & work zones",
+    summary: "Reduced limits apply in school and construction zones.",
+    details: [
+      "School zones are commonly posted at 20 mph when children are present or during posted hours.",
+      "Fines are doubled in work zones and school zones.",
+      "Slow down and watch for flashing beacons and crossing guards.",
+      "Always obey the speed displayed by an active electronic sign.",
+    ],
+    reference: "M.G.L. c. 90 §17, §18B",
+    tags: ["school", "work zone", "construction", "double fine", "children"],
+  },
+  {
+    id: "oui-dui",
+    category: "Impaired Driving",
+    icon: "🍺",
+    title: "OUI — Operating Under the Influence",
+    summary:
+      "Massachusetts calls drunk/drugged driving 'OUI'. The legal BAC limit is 0.08%.",
+    details: [
+      "It is illegal to operate with a blood alcohol concentration (BAC) of 0.08% or higher (0.04% for commercial drivers, 0.02% for drivers under 21).",
+      "Implied Consent: by driving in MA you consent to a breath/blood test. Refusing triggers an automatic license suspension (180 days for a first offense; longer for repeat offenders or if under 21).",
+      "First offense penalties can include up to 2.5 years in jail, fines of $500–$5,000, and a 1-year license suspension.",
+      "Massachusetts has a 'Melanie's Law' lookback — prior OUI convictions sharply increase penalties.",
+      "An Ignition Interlock Device (IID) is required for repeat offenders and for hardship licenses.",
+      "OUI also applies to drugs, including marijuana and prescription medication.",
+    ],
+    reference: "M.G.L. c. 90 §24, §24D (Melanie's Law)",
+    tags: ["oui", "dui", "drunk", "bac", "alcohol", "interlock", "implied consent", "0.08"],
+  },
+  {
+    id: "distracted-driving",
+    category: "Distracted Driving",
+    icon: "📱",
+    title: "Hands-Free Law",
+    summary:
+      "Since February 2020, drivers may not hold or support any electronic device.",
+    details: [
+      "You may not hold a phone or electronic device while driving — hands-free mode only.",
+      "Activating hands-free mode is allowed only with a single tap or swipe.",
+      "Drivers under 18 (junior operators) may NOT use any electronic device at all, even hands-free.",
+      "Texting while driving is prohibited for ALL drivers.",
+      "Penalties: $100 first offense, $250 second, $500+ and an insurance surcharge for third and subsequent offenses.",
+      "Exception: you may use a device to report an emergency.",
+    ],
+    reference: "M.G.L. c. 90 §13B",
+    tags: ["phone", "texting", "hands-free", "distracted", "cell", "device"],
+  },
+  {
+    id: "seatbelts",
+    category: "Occupant Safety",
+    icon: "🔒",
+    title: "Seat belt & child restraint law",
+    summary: "All occupants must be properly restrained.",
+    details: [
+      "Every driver and passenger must wear a safety belt.",
+      "Children under 8 years old must be in a federally approved child passenger restraint (car seat or booster), properly fastened.",
+      "Children must ride in a car seat/booster until they are 8 years old OR taller than 4 feet 9 inches.",
+      "Massachusetts seat belt law is a secondary offense for adults (you can be cited only if stopped for another reason), but the child restraint law is a primary offense.",
+      "Fine: $25 for an unbelted adult; $25 per improperly restrained child.",
+    ],
+    reference: "M.G.L. c. 90 §7AA, §13A",
+    tags: ["seatbelt", "seat belt", "car seat", "booster", "child", "restraint"],
+  },
+  {
+    id: "right-of-way",
+    category: "Right of Way",
+    icon: "🔀",
+    title: "Right-of-way & yielding",
+    summary: "Who goes first at intersections, rotaries, and crossings.",
+    details: [
+      "At a 4-way stop, the vehicle that arrives first proceeds first; if two arrive together, the driver on the right has the right of way.",
+      "Rotaries/roundabouts: vehicles ALREADY in the rotary have the right of way; yield before entering.",
+      "Always yield to pedestrians in a crosswalk — this is the law.",
+      "Yield to emergency vehicles with lights/sirens: pull to the right and stop.",
+      "When turning left, yield to oncoming traffic.",
+      "Yield to a vehicle already in the intersection.",
+    ],
+    reference: "M.G.L. c. 89 §8, §11",
+    tags: ["right of way", "yield", "rotary", "roundabout", "intersection", "4-way"],
+  },
+  {
+    id: "move-over",
+    category: "Right of Way",
+    icon: "🚨",
+    title: "Move Over Law",
+    summary: "Give space to stopped emergency and service vehicles.",
+    details: [
+      "When approaching a stationary emergency, maintenance, or recovery vehicle displaying flashing lights, you must move over one lane if it is safe to do so.",
+      "If you cannot move over safely, slow down to a reasonable and safe speed.",
+      "Applies to police, fire, ambulances, tow trucks, and highway maintenance vehicles.",
+    ],
+    reference: "M.G.L. c. 89 §7C",
+    tags: ["move over", "emergency", "tow truck", "police", "flashing lights"],
+  },
+  {
+    id: "turn-on-red",
+    category: "Traffic Signals",
+    icon: "🚥",
+    title: "Right turn on red & signals",
+    summary: "Rules for turning and obeying signals.",
+    details: [
+      "Right turn on red is allowed after a complete stop, unless a sign prohibits it (e.g., 'No Turn on Red').",
+      "You must yield to pedestrians and cross traffic before turning on red.",
+      "Left turn on red is permitted only from a one-way street onto another one-way street, after stopping.",
+      "A flashing red light means STOP, then proceed when safe (treat as a stop sign).",
+      "A flashing yellow light means slow down and proceed with caution.",
+      "A solid yellow light means the signal is about to turn red — stop if you can do so safely.",
+    ],
+    reference: "M.G.L. c. 89 §8; 720 CMR 9.06",
+    tags: ["red light", "turn on red", "signal", "flashing", "yellow", "stop"],
+  },
+  {
+    id: "parking",
+    category: "Parking",
+    icon: "🅿️",
+    title: "Where you may not park",
+    summary: "Common no-parking zones across Massachusetts.",
+    details: [
+      "Within 10 feet of a fire hydrant.",
+      "In front of a driveway or in a way that blocks it.",
+      "On a crosswalk or sidewalk.",
+      "Within 20 feet of an intersection or a stop sign.",
+      "Within 20 feet of a fire station driveway (on the same side).",
+      "In a bus stop, bike lane, or marked travel lane.",
+      "In a space reserved for persons with disabilities without a valid placard/plate (fines start around $100–$300).",
+      "Double parking is prohibited.",
+    ],
+    reference: "M.G.L. c. 90 §18; local ordinances",
+    tags: ["parking", "hydrant", "crosswalk", "handicap", "disabled", "no parking"],
+  },
+  {
+    id: "passing",
+    category: "Lane Use",
+    icon: "↔️",
+    title: "Passing & lane discipline",
+    summary: "How to pass safely and use lanes correctly.",
+    details: [
+      "Pass on the left; passing on the right is allowed only in limited situations (e.g., the vehicle ahead is turning left, or on a road wide enough for two lanes in your direction).",
+      "Do not cross a solid yellow line on your side to pass.",
+      "Keep right except to pass on multi-lane highways.",
+      "Use your directional signal before changing lanes or passing.",
+      "Return to your lane only when you can see the passed vehicle in your rear-view mirror.",
+      "Never exceed the speed limit to pass.",
+    ],
+    reference: "M.G.L. c. 89 §2, §4, §4B",
+    tags: ["passing", "overtake", "lane", "keep right", "double yellow"],
+  },
+  {
+    id: "school-bus",
+    category: "Right of Way",
+    icon: "🚌",
+    title: "Stopping for school buses",
+    summary: "You must stop for a school bus with flashing red lights.",
+    details: [
+      "When a school bus displays flashing red lights and an extended stop sign, you must stop — from BOTH directions.",
+      "On a divided highway with a physical median, traffic on the opposite side does not need to stop.",
+      "Remain stopped until the red lights stop flashing and the stop sign is withdrawn.",
+      "Penalty: $250 fine for a first offense, with escalating penalties and possible license suspension for repeat offenses.",
+    ],
+    reference: "M.G.L. c. 90 §14",
+    tags: ["school bus", "flashing red", "stop sign", "children", "bus"],
+  },
+  {
+    id: "bicycles-pedestrians",
+    category: "Vulnerable Users",
+    icon: "🚲",
+    title: "Bicycles & pedestrians",
+    summary: "Sharing the road with people walking and biking.",
+    details: [
+      "Cyclists have the same rights and duties as motorists and may use the full lane.",
+      "When passing a cyclist, leave a safe distance (at least 4 feet is recommended; new rules require a 'safe passing distance').",
+      "You may cross a double yellow line to pass a cyclist when it is safe and there is no oncoming traffic.",
+      "Stop for pedestrians in any marked crosswalk.",
+      "Do not pass a vehicle that has stopped for a pedestrian at a crosswalk.",
+      "Yield to a pedestrian using a white cane or guide dog at all times.",
+    ],
+    reference: "M.G.L. c. 89 §2, §11; c. 90 §14",
+    tags: ["bicycle", "cyclist", "pedestrian", "crosswalk", "4 feet", "safe passing"],
+  },
+  {
+    id: "headlights",
+    category: "Vehicle Operation",
+    icon: "💡",
+    title: "Headlights & wipers law",
+    summary: "When your headlights must be on.",
+    details: [
+      "Headlights must be on from 30 minutes after sunset to 30 minutes before sunrise.",
+      "Headlights are required during any condition with reduced visibility (under 500 feet).",
+      "Massachusetts 'Wipers On, Lights On' rule: if you need your windshield wipers due to weather, your headlights must also be on.",
+      "Use low beams within 200 feet of an oncoming vehicle and 300 feet when following another vehicle.",
+    ],
+    reference: "M.G.L. c. 85 §15; c. 90 §7",
+    tags: ["headlights", "lights", "wipers", "high beam", "low beam", "night"],
+  },
+  {
+    id: "junior-operator",
+    category: "Licensing",
+    icon: "🔰",
+    title: "Junior Operator License (under 18)",
+    summary: "Stricter rules apply to drivers under 18.",
+    details: [
+      "For the first 6 months, a junior operator may NOT drive with passengers under 18 (except immediate family) unless a licensed driver 21+ with 1+ year of experience is present.",
+      "Junior operators may not drive between 12:30 a.m. and 5:00 a.m. unless accompanied by a parent or legal guardian.",
+      "No use of any mobile/electronic device, even hands-free.",
+      "Speeding and other violations carry license suspension plus mandatory driver attitudinal retraining.",
+      "A learner's permit holder must always be accompanied by a licensed driver 21+ in the front seat.",
+    ],
+    reference: "M.G.L. c. 90 §8, §8B",
+    tags: ["junior", "teen", "under 18", "permit", "curfew", "passenger"],
+  },
+  {
+    id: "registration-insurance",
+    category: "Licensing",
+    icon: "📄",
+    title: "Registration & insurance",
+    summary: "Required documents and minimum coverage.",
+    details: [
+      "All vehicles must be registered with the RMV and display valid plates and a registration sticker.",
+      "Massachusetts requires compulsory insurance: minimum 20/40/5 (bodily injury $20k/person, $40k/accident, $5k property damage) plus PIP and uninsured motorist coverage.",
+      "Vehicles must pass an annual safety and emissions inspection (look for the inspection sticker on the windshield).",
+      "Carry your license, registration, and proof of insurance while driving.",
+      "Driving with a suspended/revoked license or without insurance carries heavy fines and possible jail.",
+    ],
+    reference: "M.G.L. c. 90 §1A, §34A; c. 175",
+    tags: ["registration", "insurance", "inspection", "plates", "rmv", "sticker"],
+  },
+  {
+    id: "winter-driving",
+    category: "Conditions",
+    icon: "❄️",
+    title: "Winter & adverse weather driving",
+    summary: "Massachusetts winters demand extra caution.",
+    details: [
+      "Clear all snow and ice from your windows, mirrors, lights, AND roof before driving — flying snow/ice can cause a citation.",
+      "Reduce speed and increase following distance on snow, ice, or wet roads.",
+      "Bridges and overpasses freeze first.",
+      "If you skid, steer gently in the direction you want the front of the car to go; avoid slamming the brakes.",
+      "Black ice is most common at dawn, dusk, and on shaded roads.",
+    ],
+    reference: "M.G.L. c. 90 §17 (reasonable speed); RMV Manual",
+    tags: ["winter", "snow", "ice", "weather", "skid", "black ice"],
+  },
+];
+
+const QUIZ = [
+  {
+    q: "What is the legal BAC limit for drivers 21 and over in Massachusetts?",
+    options: ["0.05%", "0.08%", "0.10%", "0.02%"],
+    answer: 1,
+    explain: "The legal limit is 0.08% BAC for drivers 21+ (0.02% if under 21).",
+  },
+  {
+    q: "Under the Hands-Free Law, when may you touch your phone while driving?",
+    options: [
+      "Never, under any circumstance",
+      "Only a single tap or swipe to activate hands-free mode",
+      "Whenever you are stopped at a red light",
+      "Any time as long as you are not texting",
+    ],
+    answer: 1,
+    explain:
+      "You may give a single tap or swipe to activate hands-free mode. Holding the device is illegal.",
+  },
+  {
+    q: "Until what age (or height) must a child use a car seat or booster in MA?",
+    options: [
+      "Age 5 or 3'6\"",
+      "Age 6 or 4'0\"",
+      "Age 8 or 4'9\"",
+      "Age 10 or 5'0\"",
+    ],
+    answer: 2,
+    explain: "Children must be restrained until age 8 OR taller than 4 feet 9 inches.",
+  },
+  {
+    q: "At a rotary (roundabout), who has the right of way?",
+    options: [
+      "Vehicles entering the rotary",
+      "Vehicles already in the rotary",
+      "The larger vehicle",
+      "Whoever signals first",
+    ],
+    answer: 1,
+    explain: "Vehicles already in the rotary have the right of way; yield before entering.",
+  },
+  {
+    q: "When must you stop for a school bus?",
+    options: [
+      "Only if you are directly behind it",
+      "When its red lights flash, from both directions (unless a median divides the road)",
+      "Only on local roads",
+      "Never, just slow down",
+    ],
+    answer: 1,
+    explain:
+      "Stop from both directions when red lights flash, unless a physical median separates opposing traffic.",
+  },
+  {
+    q: "What is the default speed limit in a thickly settled or business district?",
+    options: ["20 mph", "30 mph", "40 mph", "50 mph"],
+    answer: 1,
+    explain: "30 mph is the statutory limit in a thickly settled or business district unless posted otherwise.",
+  },
+  {
+    q: "Under the 'Wipers On' rule, what else must be on?",
+    options: ["Hazard lights", "Headlights", "Fog lights only", "Nothing"],
+    answer: 1,
+    explain: "If weather requires your wipers, your headlights must also be on.",
+  },
+  {
+    q: "A left turn on a red light is allowed only when...",
+    options: [
+      "Turning from a one-way street onto another one-way street, after stopping",
+      "Never",
+      "There is no oncoming traffic",
+      "On any road after 9 p.m.",
+    ],
+    answer: 0,
+    explain: "Left on red is permitted only from a one-way onto another one-way street, after a full stop.",
+  },
+  {
+    q: "How far from a fire hydrant must you park?",
+    options: ["5 feet", "10 feet", "15 feet", "25 feet"],
+    answer: 1,
+    explain: "You must park at least 10 feet away from a fire hydrant.",
+  },
+  {
+    q: "Refusing a breath test (Implied Consent) on a first offense results in...",
+    options: [
+      "A warning",
+      "A 180-day license suspension",
+      "A $50 fine only",
+      "No penalty",
+    ],
+    answer: 1,
+    explain: "Refusal triggers an automatic 180-day license suspension on a first offense.",
+  },
+];
+
+if (typeof module !== "undefined") {
+  module.exports = { RULES, QUIZ };
+}
+
+/* Massachusetts Traffic Rules — UI logic. Pure vanilla JS, no build step. */
+(function () {
+  "use strict";
+
+  /* ---------- Tab navigation ---------- */
+  const tabs = document.querySelectorAll(".tab");
+  const views = {
+    rules: document.getElementById("view-rules"),
+    quiz: document.getElementById("view-quiz"),
+    about: document.getElementById("view-about"),
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.classList.remove("is-active"));
+      tab.classList.add("is-active");
+      Object.values(views).forEach((v) => v.classList.remove("is-active"));
+      views[tab.dataset.view].classList.add("is-active");
+    });
+  });
+
+  /* ---------- Rules: rendering, search & filter ---------- */
+  const listEl = document.getElementById("rulesList");
+  const searchEl = document.getElementById("search");
+  const filtersEl = document.getElementById("categoryFilters");
+  const countEl = document.getElementById("resultCount");
+  const noResultsEl = document.getElementById("noResults");
+
+  let activeCategory = "All";
+
+  const categories = ["All", ...new Set(RULES.map((r) => r.category))];
+
+  categories.forEach((cat) => {
+    const chip = document.createElement("button");
+    chip.className = "chip" + (cat === "All" ? " is-active" : "");
+    chip.textContent = cat;
+    chip.addEventListener("click", () => {
+      activeCategory = cat;
+      filtersEl
+        .querySelectorAll(".chip")
+        .forEach((c) => c.classList.toggle("is-active", c.textContent === cat));
+      render();
+    });
+    filtersEl.appendChild(chip);
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function matches(rule, term) {
+    if (!term) return true;
+    const haystack = (
+      rule.title +
+      " " +
+      rule.summary +
+      " " +
+      rule.category +
+      " " +
+      rule.details.join(" ") +
+      " " +
+      rule.tags.join(" ")
+    ).toLowerCase();
+    return term
+      .toLowerCase()
+      .split(/\s+/)
+      .every((word) => haystack.includes(word));
+  }
+
+  function render() {
+    const term = searchEl.value.trim();
+    const filtered = RULES.filter(
+      (r) =>
+        (activeCategory === "All" || r.category === activeCategory) &&
+        matches(r, term)
+    );
+
+    listEl.innerHTML = "";
+    noResultsEl.hidden = filtered.length !== 0;
+    countEl.textContent = filtered.length
+      ? `${filtered.length} rule${filtered.length > 1 ? "s" : ""} shown`
+      : "";
+
+    filtered.forEach((rule) => {
+      const card = document.createElement("article");
+      card.className = "rule-card";
+      card.innerHTML = `
+        <div class="rule-head" role="button" tabindex="0" aria-expanded="false">
+          <span class="rule-icon" aria-hidden="true">${rule.icon}</span>
+          <div class="rule-headtext">
+            <div class="rule-cat">${escapeHtml(rule.category)}</div>
+            <h3 class="rule-title">${escapeHtml(rule.title)}</h3>
+            <p class="rule-summary">${escapeHtml(rule.summary)}</p>
+          </div>
+          <span class="rule-toggle" aria-hidden="true">▾</span>
+        </div>
+        <div class="rule-body">
+          <ul>${rule.details.map((d) => `<li>${escapeHtml(d)}</li>`).join("")}</ul>
+          <span class="rule-ref">${escapeHtml(rule.reference)}</span>
+        </div>`;
+
+      const head = card.querySelector(".rule-head");
+      const toggle = () => {
+        const open = card.classList.toggle("is-open");
+        head.setAttribute("aria-expanded", String(open));
+      };
+      head.addEventListener("click", toggle);
+      head.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      });
+      listEl.appendChild(card);
+    });
+  }
+
+  searchEl.addEventListener("input", render);
+  render();
+
+  /* ---------- Quiz ---------- */
+  const quizIntro = document.getElementById("quizIntro");
+  const quizActive = document.getElementById("quizActive");
+  const quizResult = document.getElementById("quizResult");
+  const questionText = document.getElementById("questionText");
+  const answerOptions = document.getElementById("answerOptions");
+  const feedback = document.getElementById("feedback");
+  const nextBtn = document.getElementById("nextQuestion");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
+  const scoreText = document.getElementById("scoreText");
+  const scoreMessage = document.getElementById("scoreMessage");
+
+  document.getElementById("quizTotal").textContent = QUIZ.length;
+
+  let order = [];
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startQuiz() {
+    order = shuffle(QUIZ.map((_, i) => i));
+    current = 0;
+    score = 0;
+    quizIntro.hidden = true;
+    quizResult.hidden = true;
+    quizActive.hidden = false;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    answered = false;
+    feedback.hidden = true;
+    nextBtn.hidden = true;
+    const item = QUIZ[order[current]];
+
+    progressFill.style.width = `${(current / QUIZ.length) * 100}%`;
+    progressText.textContent = `Question ${current + 1} of ${QUIZ.length}`;
+    questionText.textContent = item.q;
+
+    answerOptions.innerHTML = "";
+    item.options.forEach((opt, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "answer-btn";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => selectAnswer(idx, item, btn));
+      answerOptions.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(idx, item, btn) {
+    if (answered) return;
+    answered = true;
+    const buttons = answerOptions.querySelectorAll(".answer-btn");
+    buttons.forEach((b, i) => {
+      b.disabled = true;
+      if (i === item.answer) b.classList.add("correct");
+    });
+
+    if (idx === item.answer) {
+      score++;
+      feedback.className = "feedback right";
+      feedback.textContent = "✓ Correct! " + item.explain;
+    } else {
+      btn.classList.add("wrong");
+      feedback.className = "feedback wrong";
+      feedback.textContent = "✗ Not quite. " + item.explain;
+    }
+    feedback.hidden = false;
+    nextBtn.hidden = false;
+    nextBtn.textContent = current + 1 < QUIZ.length ? "Next →" : "See results →";
+  }
+
+  function nextQuestion() {
+    current++;
+    if (current < QUIZ.length) {
+      showQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function finishQuiz() {
+    quizActive.hidden = true;
+    quizResult.hidden = false;
+    const pct = Math.round((score / QUIZ.length) * 100);
+    scoreText.textContent = `${score} / ${QUIZ.length}  (${pct}%)`;
+    if (pct >= 90) {
+      scoreMessage.textContent = "🏆 Excellent! You know the rules of the road.";
+    } else if (pct >= 70) {
+      scoreMessage.textContent = "✅ You passed! That's above the 70% RMV threshold.";
+    } else {
+      scoreMessage.textContent =
+        "📚 Keep studying — review the Rules tab and try again.";
+    }
+  }
+
+  document.getElementById("startQuiz").addEventListener("click", startQuiz);
+  document.getElementById("retakeQuiz").addEventListener("click", startQuiz);
+  nextBtn.addEventListener("click", nextQuestion);
+})();
+
+    </script>
+  </body>
+</html>
