@@ -1,232 +1,355 @@
-/* Massachusetts Traffic Rules — UI logic. Pure vanilla JS, no build step. */
+/* RoadReady MA — gamified course logic. Vanilla JS, no build, fully offline. */
 (function () {
   "use strict";
 
-  /* ---------- Tab navigation ---------- */
-  const tabs = document.querySelectorAll(".tab");
-  const views = {
-    rules: document.getElementById("view-rules"),
-    quiz: document.getElementById("view-quiz"),
-    about: document.getElementById("view-about"),
+  /* ---------------- Persistent state ---------------- */
+  const SAVE_KEY = "roadready_ma_v1";
+  const MAX_HEARTS = 5;
+  const XP_PER_CORRECT = 10;
+
+  const defaultState = {
+    xp: 0,
+    streak: 1,
+    hearts: MAX_HEARTS,
+    heartsAt: Date.now(),
+    completed: {}, // lessonId -> bestAccuracy
+    lastDay: todayKey(),
   };
 
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => t.classList.remove("is-active"));
-      tab.classList.add("is-active");
-      Object.values(views).forEach((v) => v.classList.remove("is-active"));
-      views[tab.dataset.view].classList.add("is-active");
-    });
-  });
-
-  /* ---------- Rules: rendering, search & filter ---------- */
-  const listEl = document.getElementById("rulesList");
-  const searchEl = document.getElementById("search");
-  const filtersEl = document.getElementById("categoryFilters");
-  const countEl = document.getElementById("resultCount");
-  const noResultsEl = document.getElementById("noResults");
-
-  let activeCategory = "All";
-
-  const categories = ["All", ...new Set(RULES.map((r) => r.category))];
-
-  categories.forEach((cat) => {
-    const chip = document.createElement("button");
-    chip.className = "chip" + (cat === "All" ? " is-active" : "");
-    chip.textContent = cat;
-    chip.addEventListener("click", () => {
-      activeCategory = cat;
-      filtersEl
-        .querySelectorAll(".chip")
-        .forEach((c) => c.classList.toggle("is-active", c.textContent === cat));
-      render();
-    });
-    filtersEl.appendChild(chip);
-  });
-
-  function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
   }
 
-  function matches(rule, term) {
-    if (!term) return true;
-    const haystack = (
-      rule.title +
-      " " +
-      rule.summary +
-      " " +
-      rule.category +
-      " " +
-      rule.details.join(" ") +
-      " " +
-      rule.tags.join(" ")
-    ).toLowerCase();
-    return term
-      .toLowerCase()
-      .split(/\s+/)
-      .every((word) => haystack.includes(word));
-  }
-
-  function render() {
-    const term = searchEl.value.trim();
-    const filtered = RULES.filter(
-      (r) =>
-        (activeCategory === "All" || r.category === activeCategory) &&
-        matches(r, term)
-    );
-
-    listEl.innerHTML = "";
-    noResultsEl.hidden = filtered.length !== 0;
-    countEl.textContent = filtered.length
-      ? `${filtered.length} rule${filtered.length > 1 ? "s" : ""} shown`
-      : "";
-
-    filtered.forEach((rule) => {
-      const card = document.createElement("article");
-      card.className = "rule-card";
-      card.innerHTML = `
-        <div class="rule-head" role="button" tabindex="0" aria-expanded="false">
-          <span class="rule-icon" aria-hidden="true">${rule.icon}</span>
-          <div class="rule-headtext">
-            <div class="rule-cat">${escapeHtml(rule.category)}</div>
-            <h3 class="rule-title">${escapeHtml(rule.title)}</h3>
-            <p class="rule-summary">${escapeHtml(rule.summary)}</p>
-          </div>
-          <span class="rule-toggle" aria-hidden="true">▾</span>
-        </div>
-        <div class="rule-body">
-          <ul>${rule.details.map((d) => `<li>${escapeHtml(d)}</li>`).join("")}</ul>
-          <span class="rule-ref">${escapeHtml(rule.reference)}</span>
-        </div>`;
-
-      const head = card.querySelector(".rule-head");
-      const toggle = () => {
-        const open = card.classList.toggle("is-open");
-        head.setAttribute("aria-expanded", String(open));
-      };
-      head.addEventListener("click", toggle);
-      head.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          toggle();
+  function load() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return { ...defaultState };
+      const s = { ...defaultState, ...JSON.parse(raw) };
+      // Refill 1 heart every 30 min, cap at MAX.
+      if (s.hearts < MAX_HEARTS) {
+        const gained = Math.floor((Date.now() - (s.heartsAt || 0)) / (30 * 60 * 1000));
+        if (gained > 0) {
+          s.hearts = Math.min(MAX_HEARTS, s.hearts + gained);
+          s.heartsAt = Date.now();
         }
+      }
+      // Streak bookkeeping.
+      const t = todayKey();
+      if (s.lastDay !== t) {
+        const diff = (new Date(t) - new Date(s.lastDay)) / 86400000;
+        s.streak = diff === 1 ? s.streak + 1 : 1;
+        s.lastDay = t;
+      }
+      return s;
+    } catch (e) {
+      return { ...defaultState };
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* storage may be unavailable (private mode) — run in-memory */
+    }
+  }
+
+  let state = load();
+
+  /* ---------------- Flatten lessons for ordering ---------------- */
+  const allLessons = [];
+  UNITS.forEach((u, ui) =>
+    u.lessons.forEach((l) => allLessons.push({ ...l, unitIndex: ui, color: u.color }))
+  );
+  const lessonById = Object.fromEntries(allLessons.map((l) => [l.id, l]));
+
+  function isUnlocked(lessonId) {
+    const idx = allLessons.findIndex((l) => l.id === lessonId);
+    if (idx === 0) return true;
+    return !!state.completed[allLessons[idx - 1].id];
+  }
+  function firstIncompleteId() {
+    const l = allLessons.find((x) => !state.completed[x.id]);
+    return l ? l.id : null;
+  }
+
+  /* ---------------- DOM refs ---------------- */
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    home: $("screen-home"),
+    lesson: $("screen-lesson"),
+    complete: $("screen-complete"),
+    failed: $("screen-failed"),
+  };
+  function show(name) {
+    Object.values(screens).forEach((s) => s.classList.remove("is-active"));
+    screens[name].classList.add("is-active");
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- Top-bar stats ---------------- */
+  function renderStats() {
+    $("statStreak").textContent = state.streak;
+    $("statXp").textContent = state.xp;
+    $("statHearts").textContent = state.hearts;
+  }
+
+  /* ---------------- Build learning path ---------------- */
+  const offsets = ["", "off-r", "off-rr", "off-r", "", "off-l", "off-ll", "off-l"];
+  function renderPath() {
+    const path = $("path");
+    path.innerHTML = "";
+    const startId = firstIncompleteId();
+    let nodeCounter = 0;
+
+    UNITS.forEach((unit) => {
+      const banner = document.createElement("div");
+      banner.className = "unit-banner unit-" + unit.color;
+      banner.innerHTML = `<h2>${esc(unit.title)}</h2><p>${esc(unit.subtitle)}</p>`;
+      path.appendChild(banner);
+
+      const trail = document.createElement("div");
+      trail.className = "trail";
+      unit.lessons.forEach((lesson) => {
+        const row = document.createElement("div");
+        row.className = "node-row " + offsets[nodeCounter % offsets.length];
+        nodeCounter++;
+
+        const done = !!state.completed[lesson.id];
+        const unlocked = isUnlocked(lesson.id);
+        const isStart = lesson.id === startId;
+
+        const btn = document.createElement("button");
+        btn.className =
+          "node " + (done ? "node-done" : isStart ? "node-current" : unlocked ? "node-current" : "node-locked");
+        btn.setAttribute("aria-label", lesson.title + (unlocked ? "" : " (locked)"));
+        btn.innerHTML =
+          `<span class="node-face">${done ? "✓" : unlocked ? lesson.icon : "🔒"}</span>` +
+          (done ? `<span class="node-badge">⭐</span>` : "") +
+          `<span class="node-label">${esc(lesson.title)}</span>`;
+
+        if (unlocked) {
+          btn.addEventListener("click", () => startLesson(lesson.id));
+        } else {
+          btn.addEventListener("click", () => bump(btn));
+        }
+        row.appendChild(btn);
+        trail.appendChild(row);
       });
-      listEl.appendChild(card);
+      path.appendChild(trail);
     });
   }
-
-  searchEl.addEventListener("input", render);
-  render();
-
-  /* ---------- Quiz ---------- */
-  const quizIntro = document.getElementById("quizIntro");
-  const quizActive = document.getElementById("quizActive");
-  const quizResult = document.getElementById("quizResult");
-  const questionText = document.getElementById("questionText");
-  const answerOptions = document.getElementById("answerOptions");
-  const feedback = document.getElementById("feedback");
-  const nextBtn = document.getElementById("nextQuestion");
-  const progressFill = document.getElementById("progressFill");
-  const progressText = document.getElementById("progressText");
-  const scoreText = document.getElementById("scoreText");
-  const scoreMessage = document.getElementById("scoreMessage");
-
-  document.getElementById("quizTotal").textContent = QUIZ.length;
-
-  let order = [];
-  let current = 0;
-  let score = 0;
-  let answered = false;
-
-  function shuffle(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+  function bump(el) {
+    el.animate(
+      [{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }],
+      { duration: 260 }
+    );
   }
 
-  function startQuiz() {
-    order = shuffle(QUIZ.map((_, i) => i));
-    current = 0;
-    score = 0;
-    quizIntro.hidden = true;
-    quizResult.hidden = true;
-    quizActive.hidden = false;
-    showQuestion();
-  }
-
-  function showQuestion() {
-    answered = false;
-    feedback.hidden = true;
-    nextBtn.hidden = true;
-    const item = QUIZ[order[current]];
-
-    progressFill.style.width = `${(current / QUIZ.length) * 100}%`;
-    progressText.textContent = `Question ${current + 1} of ${QUIZ.length}`;
-    questionText.textContent = item.q;
-
-    answerOptions.innerHTML = "";
-    item.options.forEach((opt, idx) => {
-      const btn = document.createElement("button");
-      btn.className = "answer-btn";
-      btn.textContent = opt;
-      btn.addEventListener("click", () => selectAnswer(idx, item, btn));
-      answerOptions.appendChild(btn);
+  /* ---------------- Quick reference cards + modal ---------------- */
+  function renderGuide() {
+    const grid = $("guideGrid");
+    grid.innerHTML = "";
+    allLessons.forEach((l) => {
+      const card = document.createElement("button");
+      card.className = "guide-card";
+      card.innerHTML =
+        `<span class="gc-ico">${l.icon}</span>` +
+        `<span class="gc-title">${esc(l.title)}</span>` +
+        `<span class="gc-ref">${esc(l.rule.ref)}</span>`;
+      card.addEventListener("click", () => openModal(l));
+      grid.appendChild(card);
     });
   }
+  function openModal(lesson) {
+    $("modalIco").textContent = lesson.icon;
+    $("modalTitle").textContent = lesson.rule.heading;
+    $("modalPoints").innerHTML = lesson.rule.points.map((p) => `<li>${esc(p)}</li>`).join("");
+    $("modalRef").textContent = lesson.rule.ref;
+    $("modal").hidden = false;
+  }
+  $("modalClose").addEventListener("click", () => ($("modal").hidden = true));
+  $("modal").addEventListener("click", (e) => {
+    if (e.target.id === "modal") $("modal").hidden = true;
+  });
 
-  function selectAnswer(idx, item, btn) {
-    if (answered) return;
-    answered = true;
-    const buttons = answerOptions.querySelectorAll(".answer-btn");
-    buttons.forEach((b, i) => {
-      b.disabled = true;
-      if (i === item.answer) b.classList.add("correct");
+  /* ---------------- Lesson engine ---------------- */
+  let lesson = null;
+  let qIndex = 0;
+  let correctCount = 0;
+  let answeredCount = 0;
+  let selected = -1;
+  let locked = false;
+
+  function startLesson(id) {
+    lesson = lessonById[id];
+    qIndex = 0;
+    correctCount = 0;
+    answeredCount = 0;
+    // show the rule card on the first question as a primer
+    show("lesson");
+    $("lessonHearts").textContent = state.hearts;
+    renderQuestion(true);
+  }
+
+  function renderQuestion(showPrimer) {
+    selected = -1;
+    locked = false;
+    const q = lesson.questions[qIndex];
+
+    $("lessonProgressFill").style.width = `${(qIndex / lesson.questions.length) * 100}%`;
+    $("lessonPrompt").textContent = "Select the correct answer";
+
+    const card = $("lessonCard");
+    if (showPrimer) {
+      card.classList.add("show");
+      card.innerHTML =
+        `<span class="lc-ico">${lesson.icon}</span> <b>${esc(lesson.rule.heading)}</b>`;
+    } else {
+      card.classList.remove("show");
+    }
+
+    $("lessonQuestion").textContent = q.q;
+
+    const opts = $("lessonOptions");
+    opts.innerHTML = "";
+    q.options.forEach((text, i) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.textContent = text;
+      b.addEventListener("click", () => selectOption(i));
+      opts.appendChild(b);
     });
 
-    if (idx === item.answer) {
-      score++;
-      feedback.className = "feedback right";
-      feedback.textContent = "✓ Correct! " + item.explain;
-    } else {
-      btn.classList.add("wrong");
-      feedback.className = "feedback wrong";
-      feedback.textContent = "✗ Not quite. " + item.explain;
-    }
-    feedback.hidden = false;
-    nextBtn.hidden = false;
-    nextBtn.textContent = current + 1 < QUIZ.length ? "Next →" : "See results →";
+    // reset dock
+    const dock = $("dock");
+    dock.classList.remove("right", "wrong");
+    $("dockMsg").innerHTML = "";
+    const check = $("checkBtn");
+    check.textContent = "CHECK";
+    check.disabled = true;
+    check.onclick = checkAnswer;
   }
 
-  function nextQuestion() {
-    current++;
-    if (current < QUIZ.length) {
-      showQuestion();
-    } else {
-      finishQuiz();
-    }
+  function selectOption(i) {
+    if (locked) return;
+    selected = i;
+    [...$("lessonOptions").children].forEach((el, idx) =>
+      el.classList.toggle("selected", idx === i)
+    );
+    $("checkBtn").disabled = false;
   }
 
-  function finishQuiz() {
-    quizActive.hidden = true;
-    quizResult.hidden = false;
-    const pct = Math.round((score / QUIZ.length) * 100);
-    scoreText.textContent = `${score} / ${QUIZ.length}  (${pct}%)`;
-    if (pct >= 90) {
-      scoreMessage.textContent = "🏆 Excellent! You know the rules of the road.";
-    } else if (pct >= 70) {
-      scoreMessage.textContent = "✅ You passed! That's above the 70% RMV threshold.";
+  function checkAnswer() {
+    if (locked || selected < 0) return;
+    locked = true;
+    answeredCount++;
+    const q = lesson.questions[qIndex];
+    const right = selected === q.answer;
+    const opts = [...$("lessonOptions").children];
+    opts.forEach((el, idx) => {
+      el.disabled = true;
+      el.classList.remove("selected");
+      if (idx === q.answer) el.classList.add("correct");
+      else if (idx === selected) el.classList.add("wrong");
+    });
+
+    const dock = $("dock");
+    const msg = $("dockMsg");
+    const check = $("checkBtn");
+
+    if (right) {
+      correctCount++;
+      dock.classList.add("right");
+      msg.innerHTML = `<b>Nice! 🎉</b>${esc(q.explain)}`;
     } else {
-      scoreMessage.textContent =
-        "📚 Keep studying — review the Rules tab and try again.";
+      state.hearts = Math.max(0, state.hearts - 1);
+      state.heartsAt = Date.now();
+      save();
+      $("lessonHearts").textContent = state.hearts;
+      renderStats();
+      dock.classList.add("wrong");
+      msg.innerHTML = `<b>Not quite</b>${esc(q.explain)}`;
+      pulse($("lessonHearts"));
     }
+
+    const last = qIndex + 1 >= lesson.questions.length;
+    check.textContent = last ? "FINISH" : "CONTINUE";
+    check.disabled = false;
+    check.onclick = () => {
+      if (state.hearts <= 0 && !right) {
+        return failLesson();
+      }
+      if (last) return finishLesson();
+      qIndex++;
+      renderQuestion(false);
+    };
   }
 
-  document.getElementById("startQuiz").addEventListener("click", startQuiz);
-  document.getElementById("retakeQuiz").addEventListener("click", startQuiz);
-  nextBtn.addEventListener("click", nextQuestion);
+  function finishLesson() {
+    $("lessonProgressFill").style.width = "100%";
+    const accuracy = Math.round((correctCount / lesson.questions.length) * 100);
+    const earned = correctCount * XP_PER_CORRECT + (accuracy === 100 ? 5 : 0);
+    state.xp += earned;
+    const prevBest = state.completed[lesson.id] || 0;
+    state.completed[lesson.id] = Math.max(prevBest, accuracy);
+    save();
+    renderStats();
+
+    $("completeXp").textContent = "+" + earned;
+    $("completeAcc").textContent = accuracy + "%";
+    show("complete");
+    fireConfetti();
+  }
+
+  function failLesson() {
+    show("failed");
+  }
+
+  /* ---------------- Navigation buttons ---------------- */
+  $("lessonQuit").addEventListener("click", () => {
+    if (answeredCount === 0 || confirm("Quit this lesson? Progress in it will be lost.")) {
+      goHome();
+    }
+  });
+  $("completeContinue").addEventListener("click", goHome);
+  $("failedContinue").addEventListener("click", goHome);
+
+  function goHome() {
+    renderStats();
+    renderPath();
+    show("home");
+  }
+
+  /* ---------------- FX helpers ---------------- */
+  function fireConfetti() {
+    const box = $("confetti");
+    box.innerHTML = "";
+    const colors = ["#58cc02", "#1cb0f6", "#ffc800", "#ce82ff", "#ff4b4b"];
+    for (let i = 0; i < 40; i++) {
+      const bit = document.createElement("i");
+      bit.style.left = Math.random() * 100 + "%";
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDelay = Math.random() * 0.6 + "s";
+      bit.style.transform = `translateY(0) rotate(${Math.random() * 360}deg)`;
+      box.appendChild(bit);
+    }
+  }
+  function pulse(el) {
+    el.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(1.4)" }, { transform: "scale(1)" }],
+      { duration: 320 }
+    );
+  }
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  /* ---------------- Boot ---------------- */
+  renderStats();
+  renderPath();
+  renderGuide();
 })();

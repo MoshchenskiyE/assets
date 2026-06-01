@@ -1,44 +1,54 @@
-# Massachusetts Traffic Rules
+# RoadReady MA 🚗
 
-A small, self-contained web app that provides a plain-language reference to
-Massachusetts driving laws, plus a practice quiz.
+A **free**, Duolingo-style course for learning **Massachusetts driving rules**.
+Bite-sized lessons on a gamified learning path — earn XP, keep a streak, and
+don't run out of hearts!
 
 > ⚠️ **Educational use only — not legal advice.** Content is summarized from the
 > Massachusetts Driver's Manual (RMV), the Massachusetts General Laws
 > (Chapters 85, 89 & 90), and 720 CMR. Always verify against the official
-> [Massachusetts RMV](https://www.mass.gov/rmv) and
-> [General Laws](https://malegislature.gov).
+> [Massachusetts RMV](https://www.mass.gov/rmv).
 
 ## Features
 
-- 📖 **Searchable rules** — filter by keyword (e.g. `parking`, `phone`, `speed`)
-  or by category, with expandable cards and statute references.
-- 📝 **Practice quiz** — randomized multiple-choice questions with instant
-  feedback and an RMV-style pass threshold (70%).
-- 📱 **Responsive** — works on desktop and mobile.
-- 🚀 **Zero dependencies** — pure HTML/CSS/JavaScript, no build step.
+- 🗺️ **Learning path** — 13 lessons across 4 themed units, with locked/unlocked
+  nodes just like a language-learning app.
+- 🎮 **Gamified** — XP, day streak, and a 5-heart lives system (hearts refill
+  over time). Lose all your hearts and the lesson resets.
+- ✅ **Instant feedback** — answer, check, and learn why, with the green/red
+  feedback dock and a celebratory completion screen + confetti.
+- 📖 **Quick Reference** — tap any topic to pop open the underlying rules with
+  statute citations.
+- 💾 **Saves your progress** locally (localStorage) — works fully offline.
+- 🚀 **Zero dependencies, no build step, no tracking, no cost.**
 
-## Running it
+## Run it
 
-It's a static site. Just open `index.html` in a browser, or serve the folder:
+It's a static site. Open `index.html` in a browser, or serve the folder:
 
 ```bash
 cd apps/ma-traffic-rules
-python3 -m http.server 8000
-# then visit http://localhost:8000
+python3 -m http.server 8000   # then visit http://localhost:8000
 ```
+
+### Single-file version (best for phones)
+
+`ma-traffic-rules-standalone.html` bundles the CSS, JS, and course data into one
+file — open it directly in any mobile browser, no server or network needed.
 
 ## Files
 
-| File         | Purpose                                            |
-| ------------ | -------------------------------------------------- |
-| `index.html` | Markup and view structure                          |
-| `styles.css` | Styling (Massachusetts flag-inspired palette)      |
-| `app.js`     | Tab navigation, search/filter, and quiz logic      |
-| `data.js`    | Rules content and quiz questions (edit this to update) |
+| File                              | Purpose                                            |
+| --------------------------------- | -------------------------------------------------- |
+| `index.html`                      | App shell (top bar, screens, modal)                |
+| `styles.css`                      | Duolingo-inspired design system                    |
+| `app.js`                          | Path, lesson engine, XP/hearts/streak, persistence |
+| `data.js`                         | Course content: units → lessons → questions        |
+| `ma-traffic-rules-standalone.html`| Single-file build for offline / mobile use         |
 
 ## Updating the content
 
-All rules and quiz questions live in `data.js`. Add a new rule by appending an
-object to the `RULES` array; add a quiz question by appending to the `QUIZ`
-array. No other files need to change.
+All course content lives in `data.js` as `UNITS → lessons → questions`. Add a
+lesson by appending to a unit's `lessons` array; add a question by appending to a
+lesson's `questions` array (`answer` is the 0-based index of the correct option).
+Then rebuild the standalone file if you use it.

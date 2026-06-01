@@ -1,374 +1,645 @@
 /*
- * Massachusetts Traffic Rules — reference data.
+ * Massachusetts Driving — gamified course data (Duolingo-style).
  *
- * Sourced from the Massachusetts Driver's Manual (RMV), Massachusetts General
- * Laws (M.G.L.) Chapter 89 & 90, and 720 CMR. This is an educational summary,
- * not legal advice. Always verify against the current official manual at
- * https://www.mass.gov/rmv and the General Laws at https://malegislature.gov.
+ * Educational summary of Massachusetts driving law, drawn from the
+ * Massachusetts Driver's Manual (RMV), M.G.L. Chapters 85/89/90, and 720 CMR.
+ * Not legal advice — verify at https://www.mass.gov/rmv.
+ *
+ * Structure:
+ *   UNITS[] -> { title, subtitle, color, lessons[] }
+ *   lesson  -> { id, title, icon, rule (reference card), questions[] }
+ *   question-> { q, options[], answer (index), explain }
  */
 
-const RULES = [
+const UNITS = [
   {
-    id: "speed-limits",
-    category: "Speed Limits",
-    icon: "🚦",
-    title: "Default (statutory) speed limits",
-    summary:
-      "Unless a posted sign says otherwise, these are the prima facie speed limits in Massachusetts.",
-    details: [
-      "20 mph in a designated thickly settled or business district (a 'safety zone').",
-      "30 mph in a thickly settled or business district (areas with closely spaced homes/buildings).",
-      "40 mph outside a thickly settled or business district for at least 1/8 mile.",
-      "50 mph on divided highways outside thickly settled areas.",
-      "65 mph maximum on most interstate highways where posted.",
-      "Exceeding these limits is prima facie evidence of a violation; you must always drive at a 'reasonable and proper' speed for conditions (M.G.L. c. 90 §17).",
+    title: "Unit 1 · Rules of the Road",
+    subtitle: "Speed, signals & who goes first",
+    color: "green",
+    lessons: [
+      {
+        id: "speed",
+        title: "Speed Limits",
+        icon: "🚦",
+        rule: {
+          heading: "Default speed limits",
+          points: [
+            "20 mph in a school zone or safety zone.",
+            "30 mph in a thickly settled or business district.",
+            "40 mph outside thickly settled areas.",
+            "65 mph max on interstates where posted.",
+            "Fines double in work zones and school zones.",
+          ],
+          ref: "M.G.L. c. 90 §17, §18",
+        },
+        questions: [
+          {
+            q: "What is the default speed limit in a thickly settled or business district?",
+            options: ["20 mph", "30 mph", "40 mph", "50 mph"],
+            answer: 1,
+            explain: "30 mph is the statutory limit there unless a sign says otherwise.",
+          },
+          {
+            q: "In a school zone, fines for speeding are…",
+            options: ["Waived", "The same", "Doubled", "Tripled"],
+            answer: 2,
+            explain: "Fines are doubled in school zones and work zones.",
+          },
+          {
+            q: "On most Massachusetts interstates, the maximum posted speed is…",
+            options: ["55 mph", "60 mph", "65 mph", "70 mph"],
+            answer: 2,
+            explain: "65 mph is the maximum on most interstates where posted.",
+          },
+          {
+            q: "Even below the limit, the law says you must drive at a speed that is…",
+            options: [
+              "As fast as traffic",
+              "Reasonable and proper for conditions",
+              "Exactly the limit",
+              "Your choice",
+            ],
+            answer: 1,
+            explain: "You must always drive at a reasonable and proper speed for conditions.",
+          },
+        ],
+      },
+      {
+        id: "signals",
+        title: "Traffic Signals",
+        icon: "🚥",
+        rule: {
+          heading: "Signals & turning on red",
+          points: [
+            "Right on red allowed after a full stop, unless posted otherwise.",
+            "Left on red only from a one-way onto another one-way street.",
+            "Flashing red = stop, then go (like a stop sign).",
+            "Flashing yellow = slow down, proceed with caution.",
+            "Solid yellow = stop if you safely can; red is next.",
+          ],
+          ref: "M.G.L. c. 89 §8; 720 CMR 9.06",
+        },
+        questions: [
+          {
+            q: "A right turn on red is allowed when…",
+            options: [
+              "Never",
+              "After a complete stop, unless a sign prohibits it",
+              "Only after 9 p.m.",
+              "Without stopping if clear",
+            ],
+            answer: 1,
+            explain: "Stop fully first, yield, then turn — unless a 'No Turn on Red' sign is posted.",
+          },
+          {
+            q: "A flashing red light means…",
+            options: [
+              "Go faster",
+              "Stop, then proceed when safe",
+              "Yield only",
+              "Signal is broken, ignore it",
+            ],
+            answer: 1,
+            explain: "Treat a flashing red exactly like a stop sign.",
+          },
+          {
+            q: "A left turn on red is permitted only…",
+            options: [
+              "From a one-way street onto another one-way street, after stopping",
+              "On any divided road",
+              "When no police are present",
+              "It is never allowed",
+            ],
+            answer: 0,
+            explain: "One-way to one-way only, after a complete stop.",
+          },
+          {
+            q: "A flashing yellow light means…",
+            options: ["Stop", "Slow down and proceed with caution", "Speed up", "U-turn only"],
+            answer: 1,
+            explain: "Flashing yellow = caution; slow down and watch for cross traffic.",
+          },
+        ],
+      },
+      {
+        id: "rightofway",
+        title: "Right of Way",
+        icon: "🔀",
+        rule: {
+          heading: "Who goes first",
+          points: [
+            "4-way stop: first to arrive goes first; tie → driver on the right.",
+            "Rotary: vehicles already in the circle have the right of way.",
+            "Always yield to pedestrians in a crosswalk.",
+            "Turning left: yield to oncoming traffic.",
+            "Yield to emergency vehicles — pull right and stop.",
+          ],
+          ref: "M.G.L. c. 89 §8, §11",
+        },
+        questions: [
+          {
+            q: "At a rotary (roundabout), who has the right of way?",
+            options: [
+              "Vehicles entering",
+              "Vehicles already in the rotary",
+              "The bigger vehicle",
+              "Whoever honks",
+            ],
+            answer: 1,
+            explain: "Yield before entering — traffic already circulating goes first.",
+          },
+          {
+            q: "Two cars reach a 4-way stop at the same time. Who goes first?",
+            options: [
+              "The faster car",
+              "The car on the left",
+              "The car on the right",
+              "The bigger car",
+            ],
+            answer: 2,
+            explain: "On a tie, the driver on the right has the right of way.",
+          },
+          {
+            q: "When you hear a siren and see emergency lights, you should…",
+            options: [
+              "Speed up to clear the road",
+              "Stop where you are",
+              "Pull to the right and stop",
+              "Turn left immediately",
+            ],
+            answer: 2,
+            explain: "Pull over to the right and stop until the emergency vehicle passes.",
+          },
+        ],
+      },
     ],
-    reference: "M.G.L. c. 90 §17, §18",
-    tags: ["speed", "mph", "thickly settled", "highway", "limit"],
   },
   {
-    id: "speed-special-zones",
-    category: "Speed Limits",
-    icon: "🏫",
-    title: "School zones & work zones",
-    summary: "Reduced limits apply in school and construction zones.",
-    details: [
-      "School zones are commonly posted at 20 mph when children are present or during posted hours.",
-      "Fines are doubled in work zones and school zones.",
-      "Slow down and watch for flashing beacons and crossing guards.",
-      "Always obey the speed displayed by an active electronic sign.",
+    title: "Unit 2 · Safety First",
+    subtitle: "Belts, phones & school buses",
+    color: "blue",
+    lessons: [
+      {
+        id: "handsfree",
+        title: "Hands-Free Law",
+        icon: "📱",
+        rule: {
+          heading: "Hands-Free Law (since 2020)",
+          points: [
+            "You may not hold a phone or device while driving.",
+            "Only a single tap/swipe to activate hands-free mode.",
+            "Texting is banned for all drivers.",
+            "Drivers under 18: no devices at all, even hands-free.",
+            "Fines: $100 / $250 / $500+ with a surcharge.",
+          ],
+          ref: "M.G.L. c. 90 §13B",
+        },
+        questions: [
+          {
+            q: "Under the Hands-Free Law, when may you touch your phone?",
+            options: [
+              "Anytime if not texting",
+              "A single tap or swipe to activate hands-free mode",
+              "Only at red lights",
+              "Never, at all",
+            ],
+            answer: 1,
+            explain: "One tap/swipe to start hands-free mode. Holding the device is illegal.",
+          },
+          {
+            q: "Drivers under 18 may use an electronic device…",
+            options: [
+              "Hands-free only",
+              "For navigation only",
+              "Not at all, even hands-free",
+              "Anytime",
+            ],
+            answer: 2,
+            explain: "Junior operators may not use any device, even hands-free.",
+          },
+          {
+            q: "The fine for a first hands-free offense is…",
+            options: ["$25", "$100", "$250", "$500"],
+            answer: 1,
+            explain: "$100 for the first offense, rising to $250 and $500+ after that.",
+          },
+        ],
+      },
+      {
+        id: "seatbelts",
+        title: "Belts & Car Seats",
+        icon: "🔒",
+        rule: {
+          heading: "Seat belts & child restraints",
+          points: [
+            "Every driver and passenger must buckle up.",
+            "Car seat/booster required until age 8 OR taller than 4'9\".",
+            "Child restraint law is a primary offense.",
+            "Adult belt law is a secondary offense ($25 fine).",
+          ],
+          ref: "M.G.L. c. 90 §7AA, §13A",
+        },
+        questions: [
+          {
+            q: "A child must use a car seat or booster until…",
+            options: [
+              "Age 5 or 3'6\"",
+              "Age 6 or 4'0\"",
+              "Age 8 or 4'9\"",
+              "Age 12",
+            ],
+            answer: 2,
+            explain: "Until age 8 OR taller than 4 feet 9 inches.",
+          },
+          {
+            q: "Who must wear a seat belt in the car?",
+            options: [
+              "Only the driver",
+              "Only front-seat riders",
+              "Every driver and passenger",
+              "Only on highways",
+            ],
+            answer: 2,
+            explain: "All occupants must be properly restrained.",
+          },
+        ],
+      },
+      {
+        id: "schoolbus",
+        title: "School Buses",
+        icon: "🚌",
+        rule: {
+          heading: "Stopping for school buses",
+          points: [
+            "Red flashing lights + stop sign out → STOP, both directions.",
+            "Divided highway with a median: opposite side need not stop.",
+            "Stay stopped until the lights stop and the sign folds in.",
+            "First-offense fine: $250.",
+          ],
+          ref: "M.G.L. c. 90 §14",
+        },
+        questions: [
+          {
+            q: "A school bus ahead flashes red lights and extends its stop sign. You must…",
+            options: [
+              "Pass carefully on the left",
+              "Stop and wait",
+              "Slow to 20 mph",
+              "Honk and continue",
+            ],
+            answer: 1,
+            explain: "Stop and remain stopped until the lights stop flashing and the sign folds in.",
+          },
+          {
+            q: "On a divided highway with a median, traffic on the OPPOSITE side of a stopped bus…",
+            options: [
+              "Must also stop",
+              "Does not need to stop",
+              "Must reverse",
+              "Must use hazards",
+            ],
+            answer: 1,
+            explain: "A physical median separates the directions, so the opposite side may proceed.",
+          },
+          {
+            q: "The fine for illegally passing a stopped school bus (first offense) is…",
+            options: ["$50", "$100", "$250", "$500"],
+            answer: 2,
+            explain: "$250 for a first offense, with escalating penalties after that.",
+          },
+        ],
+      },
     ],
-    reference: "M.G.L. c. 90 §17, §18B",
-    tags: ["school", "work zone", "construction", "double fine", "children"],
   },
   {
-    id: "oui-dui",
-    category: "Impaired Driving",
-    icon: "🍺",
-    title: "OUI — Operating Under the Influence",
-    summary:
-      "Massachusetts calls drunk/drugged driving 'OUI'. The legal BAC limit is 0.08%.",
-    details: [
-      "It is illegal to operate with a blood alcohol concentration (BAC) of 0.08% or higher (0.04% for commercial drivers, 0.02% for drivers under 21).",
-      "Implied Consent: by driving in MA you consent to a breath/blood test. Refusing triggers an automatic license suspension (180 days for a first offense; longer for repeat offenders or if under 21).",
-      "First offense penalties can include up to 2.5 years in jail, fines of $500–$5,000, and a 1-year license suspension.",
-      "Massachusetts has a 'Melanie's Law' lookback — prior OUI convictions sharply increase penalties.",
-      "An Ignition Interlock Device (IID) is required for repeat offenders and for hardship licenses.",
-      "OUI also applies to drugs, including marijuana and prescription medication.",
+    title: "Unit 3 · Sharing the Road",
+    subtitle: "Bikes, walkers & passing",
+    color: "purple",
+    lessons: [
+      {
+        id: "bikesped",
+        title: "Bikes & Walkers",
+        icon: "🚲",
+        rule: {
+          heading: "Bicycles & pedestrians",
+          points: [
+            "Cyclists may use the full lane; leave a safe passing distance.",
+            "You may cross a double yellow to pass a cyclist when safe.",
+            "Stop for pedestrians in any marked crosswalk.",
+            "Don't pass a car stopped for a pedestrian at a crosswalk.",
+            "Always yield to anyone using a white cane or guide dog.",
+          ],
+          ref: "M.G.L. c. 89 §2, §11; c. 90 §14",
+        },
+        questions: [
+          {
+            q: "A pedestrian is in a marked crosswalk ahead. You must…",
+            options: ["Honk", "Stop and yield", "Speed up", "Edge around them"],
+            answer: 1,
+            explain: "Stop for pedestrians in any marked crosswalk — it's the law.",
+          },
+          {
+            q: "A car ahead has stopped at a crosswalk. You should…",
+            options: [
+              "Pass it quickly",
+              "Not pass — a pedestrian may be crossing",
+              "Honk to move it",
+              "Pass on the right",
+            ],
+            answer: 1,
+            explain: "Never pass a vehicle stopped for a pedestrian at a crosswalk.",
+          },
+          {
+            q: "To pass a cyclist on a two-lane road, you may…",
+            options: [
+              "Never cross the center line",
+              "Cross a double yellow line when it is safe and clear",
+              "Force them onto the shoulder",
+              "Pass within inches",
+            ],
+            answer: 1,
+            explain: "You may cross a double yellow to pass a cyclist with a safe distance when clear.",
+          },
+        ],
+      },
+      {
+        id: "moveover",
+        title: "Move Over Law",
+        icon: "🚨",
+        rule: {
+          heading: "Move Over Law",
+          points: [
+            "Approaching a stopped vehicle with flashing lights → move over a lane.",
+            "Can't move over safely? Slow to a safe speed.",
+            "Covers police, fire, ambulance, tow trucks & maintenance.",
+          ],
+          ref: "M.G.L. c. 89 §7C",
+        },
+        questions: [
+          {
+            q: "Approaching a stopped tow truck with flashing lights, you should…",
+            options: [
+              "Maintain speed",
+              "Move over a lane if safe, or slow down",
+              "Stop completely",
+              "Flash your lights back",
+            ],
+            answer: 1,
+            explain: "Move over one lane if safe; otherwise slow to a safe speed.",
+          },
+          {
+            q: "The Move Over Law protects…",
+            options: [
+              "Only police cars",
+              "Only ambulances",
+              "Police, fire, ambulance, tow trucks & maintenance vehicles",
+              "Only highway crews",
+            ],
+            answer: 2,
+            explain: "It covers any stationary emergency, recovery, or maintenance vehicle with lights on.",
+          },
+        ],
+      },
+      {
+        id: "passing",
+        title: "Passing",
+        icon: "↔️",
+        rule: {
+          heading: "Passing & lane discipline",
+          points: [
+            "Pass on the left; keep right except to pass.",
+            "Don't cross a solid line on your side to pass.",
+            "Signal before changing lanes or passing.",
+            "Re-enter only when you can see the car in your mirror.",
+            "Never speed up beyond the limit to pass.",
+          ],
+          ref: "M.G.L. c. 89 §2, §4, §4B",
+        },
+        questions: [
+          {
+            q: "On a multi-lane highway you should…",
+            options: [
+              "Stay in the left lane",
+              "Keep right except to pass",
+              "Use any lane equally",
+              "Drive on the shoulder",
+            ],
+            answer: 1,
+            explain: "Keep right except when passing.",
+          },
+          {
+            q: "It is safe to return to your lane after passing when…",
+            options: [
+              "Immediately after pulling out",
+              "You can see the passed vehicle in your rear-view mirror",
+              "You reach 70 mph",
+              "The other driver waves",
+            ],
+            answer: 1,
+            explain: "Re-enter only once the passed vehicle is visible in your mirror.",
+          },
+          {
+            q: "To pass another car you may…",
+            options: [
+              "Exceed the speed limit briefly",
+              "Cross a solid line on your side",
+              "Never exceed the speed limit",
+              "Tailgate first",
+            ],
+            answer: 2,
+            explain: "You must never exceed the speed limit, even to pass.",
+          },
+        ],
+      },
     ],
-    reference: "M.G.L. c. 90 §24, §24D (Melanie's Law)",
-    tags: ["oui", "dui", "drunk", "bac", "alcohol", "interlock", "implied consent", "0.08"],
   },
   {
-    id: "distracted-driving",
-    category: "Distracted Driving",
-    icon: "📱",
-    title: "Hands-Free Law",
-    summary:
-      "Since February 2020, drivers may not hold or support any electronic device.",
-    details: [
-      "You may not hold a phone or electronic device while driving — hands-free mode only.",
-      "Activating hands-free mode is allowed only with a single tap or swipe.",
-      "Drivers under 18 (junior operators) may NOT use any electronic device at all, even hands-free.",
-      "Texting while driving is prohibited for ALL drivers.",
-      "Penalties: $100 first offense, $250 second, $500+ and an insurance surcharge for third and subsequent offenses.",
-      "Exception: you may use a device to report an emergency.",
+    title: "Unit 4 · Serious Stuff",
+    subtitle: "OUI, teens, winter & parking",
+    color: "gold",
+    lessons: [
+      {
+        id: "oui",
+        title: "OUI / Drunk Driving",
+        icon: "🍺",
+        rule: {
+          heading: "OUI — Operating Under the Influence",
+          points: [
+            "Illegal at 0.08% BAC (0.04% commercial, 0.02% under 21).",
+            "Implied Consent: refusing a test = 180-day suspension (1st offense).",
+            "First offense: up to 2.5 yrs jail, $500–$5,000, 1-yr suspension.",
+            "Melanie's Law: priors sharply increase penalties.",
+            "OUI also covers drugs, including marijuana.",
+          ],
+          ref: "M.G.L. c. 90 §24, §24D",
+        },
+        questions: [
+          {
+            q: "The legal BAC limit for drivers 21+ is…",
+            options: ["0.05%", "0.08%", "0.10%", "0.02%"],
+            answer: 1,
+            explain: "0.08% for drivers 21+, 0.02% if under 21.",
+          },
+          {
+            q: "Refusing a breath test on a first offense leads to…",
+            options: [
+              "A warning",
+              "A 180-day license suspension",
+              "A $50 fine",
+              "Nothing",
+            ],
+            answer: 1,
+            explain: "Implied Consent: refusal = automatic 180-day suspension on a first offense.",
+          },
+          {
+            q: "OUI in Massachusetts applies to…",
+            options: [
+              "Only alcohol",
+              "Only hard drugs",
+              "Alcohol, marijuana and other drugs",
+              "Only repeat offenders",
+            ],
+            answer: 2,
+            explain: "OUI covers alcohol, marijuana, prescription and other drugs.",
+          },
+          {
+            q: "The under-21 BAC limit is…",
+            options: ["0.08%", "0.05%", "0.02%", "0.00%"],
+            answer: 2,
+            explain: "0.02% for drivers under 21 — essentially zero tolerance.",
+          },
+        ],
+      },
+      {
+        id: "junior",
+        title: "Junior Operators",
+        icon: "🔰",
+        rule: {
+          heading: "Junior Operator License (under 18)",
+          points: [
+            "First 6 months: no passengers under 18 (except family) unless a 21+ driver is present.",
+            "No driving 12:30 a.m.–5:00 a.m. without a parent/guardian.",
+            "No mobile devices at all, even hands-free.",
+            "Permit holders need a 21+ licensed driver up front.",
+          ],
+          ref: "M.G.L. c. 90 §8, §8B",
+        },
+        questions: [
+          {
+            q: "For the first 6 months, a junior operator generally may not…",
+            options: [
+              "Drive at all",
+              "Carry passengers under 18 (except family) alone",
+              "Use the highway",
+              "Drive in the rain",
+            ],
+            answer: 1,
+            explain: "No under-18 passengers (except immediate family) without a qualified 21+ driver.",
+          },
+          {
+            q: "Junior operators may not drive between…",
+            options: [
+              "10 p.m. and 6 a.m.",
+              "12:30 a.m. and 5:00 a.m. (without a parent/guardian)",
+              "Midnight and 4 a.m.",
+              "9 p.m. and 5 a.m.",
+            ],
+            answer: 1,
+            explain: "The night restriction runs 12:30 a.m.–5:00 a.m. unless a parent/guardian is along.",
+          },
+        ],
+      },
+      {
+        id: "winter",
+        title: "Winter Driving",
+        icon: "❄️",
+        rule: {
+          heading: "Winter & adverse weather",
+          points: [
+            "Clear ALL snow/ice — windows, mirrors, lights AND roof.",
+            "'Wipers On, Lights On' — if wipers run, headlights must too.",
+            "Increase following distance on snow and ice.",
+            "Bridges and overpasses freeze first.",
+            "Black ice is worst at dawn, dusk and shaded spots.",
+          ],
+          ref: "M.G.L. c. 85 §15; c. 90 §17",
+        },
+        questions: [
+          {
+            q: "Under the 'Wipers On' rule, when your wipers run you must also turn on…",
+            options: ["Hazards", "Headlights", "Fog lights", "Nothing"],
+            answer: 1,
+            explain: "If weather needs your wipers, your headlights must be on too.",
+          },
+          {
+            q: "Before driving after a snowstorm you should clear snow from…",
+            options: [
+              "Just the windshield",
+              "Windows and mirrors only",
+              "Windows, mirrors, lights AND the roof",
+              "Only the wipers",
+            ],
+            answer: 2,
+            explain: "Clear everything — flying snow/ice from your roof can get you cited.",
+          },
+          {
+            q: "Black ice is most likely at…",
+            options: [
+              "Midday in sun",
+              "Dawn, dusk and shaded roads",
+              "Only on highways",
+              "Only during snowfall",
+            ],
+            answer: 1,
+            explain: "Black ice forms at dawn, dusk, and on shaded or bridge surfaces.",
+          },
+        ],
+      },
+      {
+        id: "parking",
+        title: "Parking",
+        icon: "🅿️",
+        rule: {
+          heading: "Where you may NOT park",
+          points: [
+            "Within 10 ft of a fire hydrant.",
+            "Within 20 ft of an intersection or stop sign.",
+            "On a crosswalk, sidewalk or bike lane.",
+            "Blocking a driveway; double parking.",
+            "In a disabled space without a valid placard/plate.",
+          ],
+          ref: "M.G.L. c. 90 §18",
+        },
+        questions: [
+          {
+            q: "How far from a fire hydrant must you park?",
+            options: ["5 feet", "10 feet", "15 feet", "25 feet"],
+            answer: 1,
+            explain: "At least 10 feet from a fire hydrant.",
+          },
+          {
+            q: "You must not park within how many feet of an intersection?",
+            options: ["5 feet", "10 feet", "20 feet", "40 feet"],
+            answer: 2,
+            explain: "Keep at least 20 feet from an intersection or stop sign.",
+          },
+          {
+            q: "Parking in a disabled space without a valid placard…",
+            options: [
+              "Is fine if brief",
+              "Is allowed after 6 p.m.",
+              "Is illegal and heavily fined",
+              "Is a warning only",
+            ],
+            answer: 2,
+            explain: "It's illegal and carries fines starting around $100–$300.",
+          },
+        ],
+      },
     ],
-    reference: "M.G.L. c. 90 §13B",
-    tags: ["phone", "texting", "hands-free", "distracted", "cell", "device"],
-  },
-  {
-    id: "seatbelts",
-    category: "Occupant Safety",
-    icon: "🔒",
-    title: "Seat belt & child restraint law",
-    summary: "All occupants must be properly restrained.",
-    details: [
-      "Every driver and passenger must wear a safety belt.",
-      "Children under 8 years old must be in a federally approved child passenger restraint (car seat or booster), properly fastened.",
-      "Children must ride in a car seat/booster until they are 8 years old OR taller than 4 feet 9 inches.",
-      "Massachusetts seat belt law is a secondary offense for adults (you can be cited only if stopped for another reason), but the child restraint law is a primary offense.",
-      "Fine: $25 for an unbelted adult; $25 per improperly restrained child.",
-    ],
-    reference: "M.G.L. c. 90 §7AA, §13A",
-    tags: ["seatbelt", "seat belt", "car seat", "booster", "child", "restraint"],
-  },
-  {
-    id: "right-of-way",
-    category: "Right of Way",
-    icon: "🔀",
-    title: "Right-of-way & yielding",
-    summary: "Who goes first at intersections, rotaries, and crossings.",
-    details: [
-      "At a 4-way stop, the vehicle that arrives first proceeds first; if two arrive together, the driver on the right has the right of way.",
-      "Rotaries/roundabouts: vehicles ALREADY in the rotary have the right of way; yield before entering.",
-      "Always yield to pedestrians in a crosswalk — this is the law.",
-      "Yield to emergency vehicles with lights/sirens: pull to the right and stop.",
-      "When turning left, yield to oncoming traffic.",
-      "Yield to a vehicle already in the intersection.",
-    ],
-    reference: "M.G.L. c. 89 §8, §11",
-    tags: ["right of way", "yield", "rotary", "roundabout", "intersection", "4-way"],
-  },
-  {
-    id: "move-over",
-    category: "Right of Way",
-    icon: "🚨",
-    title: "Move Over Law",
-    summary: "Give space to stopped emergency and service vehicles.",
-    details: [
-      "When approaching a stationary emergency, maintenance, or recovery vehicle displaying flashing lights, you must move over one lane if it is safe to do so.",
-      "If you cannot move over safely, slow down to a reasonable and safe speed.",
-      "Applies to police, fire, ambulances, tow trucks, and highway maintenance vehicles.",
-    ],
-    reference: "M.G.L. c. 89 §7C",
-    tags: ["move over", "emergency", "tow truck", "police", "flashing lights"],
-  },
-  {
-    id: "turn-on-red",
-    category: "Traffic Signals",
-    icon: "🚥",
-    title: "Right turn on red & signals",
-    summary: "Rules for turning and obeying signals.",
-    details: [
-      "Right turn on red is allowed after a complete stop, unless a sign prohibits it (e.g., 'No Turn on Red').",
-      "You must yield to pedestrians and cross traffic before turning on red.",
-      "Left turn on red is permitted only from a one-way street onto another one-way street, after stopping.",
-      "A flashing red light means STOP, then proceed when safe (treat as a stop sign).",
-      "A flashing yellow light means slow down and proceed with caution.",
-      "A solid yellow light means the signal is about to turn red — stop if you can do so safely.",
-    ],
-    reference: "M.G.L. c. 89 §8; 720 CMR 9.06",
-    tags: ["red light", "turn on red", "signal", "flashing", "yellow", "stop"],
-  },
-  {
-    id: "parking",
-    category: "Parking",
-    icon: "🅿️",
-    title: "Where you may not park",
-    summary: "Common no-parking zones across Massachusetts.",
-    details: [
-      "Within 10 feet of a fire hydrant.",
-      "In front of a driveway or in a way that blocks it.",
-      "On a crosswalk or sidewalk.",
-      "Within 20 feet of an intersection or a stop sign.",
-      "Within 20 feet of a fire station driveway (on the same side).",
-      "In a bus stop, bike lane, or marked travel lane.",
-      "In a space reserved for persons with disabilities without a valid placard/plate (fines start around $100–$300).",
-      "Double parking is prohibited.",
-    ],
-    reference: "M.G.L. c. 90 §18; local ordinances",
-    tags: ["parking", "hydrant", "crosswalk", "handicap", "disabled", "no parking"],
-  },
-  {
-    id: "passing",
-    category: "Lane Use",
-    icon: "↔️",
-    title: "Passing & lane discipline",
-    summary: "How to pass safely and use lanes correctly.",
-    details: [
-      "Pass on the left; passing on the right is allowed only in limited situations (e.g., the vehicle ahead is turning left, or on a road wide enough for two lanes in your direction).",
-      "Do not cross a solid yellow line on your side to pass.",
-      "Keep right except to pass on multi-lane highways.",
-      "Use your directional signal before changing lanes or passing.",
-      "Return to your lane only when you can see the passed vehicle in your rear-view mirror.",
-      "Never exceed the speed limit to pass.",
-    ],
-    reference: "M.G.L. c. 89 §2, §4, §4B",
-    tags: ["passing", "overtake", "lane", "keep right", "double yellow"],
-  },
-  {
-    id: "school-bus",
-    category: "Right of Way",
-    icon: "🚌",
-    title: "Stopping for school buses",
-    summary: "You must stop for a school bus with flashing red lights.",
-    details: [
-      "When a school bus displays flashing red lights and an extended stop sign, you must stop — from BOTH directions.",
-      "On a divided highway with a physical median, traffic on the opposite side does not need to stop.",
-      "Remain stopped until the red lights stop flashing and the stop sign is withdrawn.",
-      "Penalty: $250 fine for a first offense, with escalating penalties and possible license suspension for repeat offenses.",
-    ],
-    reference: "M.G.L. c. 90 §14",
-    tags: ["school bus", "flashing red", "stop sign", "children", "bus"],
-  },
-  {
-    id: "bicycles-pedestrians",
-    category: "Vulnerable Users",
-    icon: "🚲",
-    title: "Bicycles & pedestrians",
-    summary: "Sharing the road with people walking and biking.",
-    details: [
-      "Cyclists have the same rights and duties as motorists and may use the full lane.",
-      "When passing a cyclist, leave a safe distance (at least 4 feet is recommended; new rules require a 'safe passing distance').",
-      "You may cross a double yellow line to pass a cyclist when it is safe and there is no oncoming traffic.",
-      "Stop for pedestrians in any marked crosswalk.",
-      "Do not pass a vehicle that has stopped for a pedestrian at a crosswalk.",
-      "Yield to a pedestrian using a white cane or guide dog at all times.",
-    ],
-    reference: "M.G.L. c. 89 §2, §11; c. 90 §14",
-    tags: ["bicycle", "cyclist", "pedestrian", "crosswalk", "4 feet", "safe passing"],
-  },
-  {
-    id: "headlights",
-    category: "Vehicle Operation",
-    icon: "💡",
-    title: "Headlights & wipers law",
-    summary: "When your headlights must be on.",
-    details: [
-      "Headlights must be on from 30 minutes after sunset to 30 minutes before sunrise.",
-      "Headlights are required during any condition with reduced visibility (under 500 feet).",
-      "Massachusetts 'Wipers On, Lights On' rule: if you need your windshield wipers due to weather, your headlights must also be on.",
-      "Use low beams within 200 feet of an oncoming vehicle and 300 feet when following another vehicle.",
-    ],
-    reference: "M.G.L. c. 85 §15; c. 90 §7",
-    tags: ["headlights", "lights", "wipers", "high beam", "low beam", "night"],
-  },
-  {
-    id: "junior-operator",
-    category: "Licensing",
-    icon: "🔰",
-    title: "Junior Operator License (under 18)",
-    summary: "Stricter rules apply to drivers under 18.",
-    details: [
-      "For the first 6 months, a junior operator may NOT drive with passengers under 18 (except immediate family) unless a licensed driver 21+ with 1+ year of experience is present.",
-      "Junior operators may not drive between 12:30 a.m. and 5:00 a.m. unless accompanied by a parent or legal guardian.",
-      "No use of any mobile/electronic device, even hands-free.",
-      "Speeding and other violations carry license suspension plus mandatory driver attitudinal retraining.",
-      "A learner's permit holder must always be accompanied by a licensed driver 21+ in the front seat.",
-    ],
-    reference: "M.G.L. c. 90 §8, §8B",
-    tags: ["junior", "teen", "under 18", "permit", "curfew", "passenger"],
-  },
-  {
-    id: "registration-insurance",
-    category: "Licensing",
-    icon: "📄",
-    title: "Registration & insurance",
-    summary: "Required documents and minimum coverage.",
-    details: [
-      "All vehicles must be registered with the RMV and display valid plates and a registration sticker.",
-      "Massachusetts requires compulsory insurance: minimum 20/40/5 (bodily injury $20k/person, $40k/accident, $5k property damage) plus PIP and uninsured motorist coverage.",
-      "Vehicles must pass an annual safety and emissions inspection (look for the inspection sticker on the windshield).",
-      "Carry your license, registration, and proof of insurance while driving.",
-      "Driving with a suspended/revoked license or without insurance carries heavy fines and possible jail.",
-    ],
-    reference: "M.G.L. c. 90 §1A, §34A; c. 175",
-    tags: ["registration", "insurance", "inspection", "plates", "rmv", "sticker"],
-  },
-  {
-    id: "winter-driving",
-    category: "Conditions",
-    icon: "❄️",
-    title: "Winter & adverse weather driving",
-    summary: "Massachusetts winters demand extra caution.",
-    details: [
-      "Clear all snow and ice from your windows, mirrors, lights, AND roof before driving — flying snow/ice can cause a citation.",
-      "Reduce speed and increase following distance on snow, ice, or wet roads.",
-      "Bridges and overpasses freeze first.",
-      "If you skid, steer gently in the direction you want the front of the car to go; avoid slamming the brakes.",
-      "Black ice is most common at dawn, dusk, and on shaded roads.",
-    ],
-    reference: "M.G.L. c. 90 §17 (reasonable speed); RMV Manual",
-    tags: ["winter", "snow", "ice", "weather", "skid", "black ice"],
-  },
-];
-
-const QUIZ = [
-  {
-    q: "What is the legal BAC limit for drivers 21 and over in Massachusetts?",
-    options: ["0.05%", "0.08%", "0.10%", "0.02%"],
-    answer: 1,
-    explain: "The legal limit is 0.08% BAC for drivers 21+ (0.02% if under 21).",
-  },
-  {
-    q: "Under the Hands-Free Law, when may you touch your phone while driving?",
-    options: [
-      "Never, under any circumstance",
-      "Only a single tap or swipe to activate hands-free mode",
-      "Whenever you are stopped at a red light",
-      "Any time as long as you are not texting",
-    ],
-    answer: 1,
-    explain:
-      "You may give a single tap or swipe to activate hands-free mode. Holding the device is illegal.",
-  },
-  {
-    q: "Until what age (or height) must a child use a car seat or booster in MA?",
-    options: [
-      "Age 5 or 3'6\"",
-      "Age 6 or 4'0\"",
-      "Age 8 or 4'9\"",
-      "Age 10 or 5'0\"",
-    ],
-    answer: 2,
-    explain: "Children must be restrained until age 8 OR taller than 4 feet 9 inches.",
-  },
-  {
-    q: "At a rotary (roundabout), who has the right of way?",
-    options: [
-      "Vehicles entering the rotary",
-      "Vehicles already in the rotary",
-      "The larger vehicle",
-      "Whoever signals first",
-    ],
-    answer: 1,
-    explain: "Vehicles already in the rotary have the right of way; yield before entering.",
-  },
-  {
-    q: "When must you stop for a school bus?",
-    options: [
-      "Only if you are directly behind it",
-      "When its red lights flash, from both directions (unless a median divides the road)",
-      "Only on local roads",
-      "Never, just slow down",
-    ],
-    answer: 1,
-    explain:
-      "Stop from both directions when red lights flash, unless a physical median separates opposing traffic.",
-  },
-  {
-    q: "What is the default speed limit in a thickly settled or business district?",
-    options: ["20 mph", "30 mph", "40 mph", "50 mph"],
-    answer: 1,
-    explain: "30 mph is the statutory limit in a thickly settled or business district unless posted otherwise.",
-  },
-  {
-    q: "Under the 'Wipers On' rule, what else must be on?",
-    options: ["Hazard lights", "Headlights", "Fog lights only", "Nothing"],
-    answer: 1,
-    explain: "If weather requires your wipers, your headlights must also be on.",
-  },
-  {
-    q: "A left turn on a red light is allowed only when...",
-    options: [
-      "Turning from a one-way street onto another one-way street, after stopping",
-      "Never",
-      "There is no oncoming traffic",
-      "On any road after 9 p.m.",
-    ],
-    answer: 0,
-    explain: "Left on red is permitted only from a one-way onto another one-way street, after a full stop.",
-  },
-  {
-    q: "How far from a fire hydrant must you park?",
-    options: ["5 feet", "10 feet", "15 feet", "25 feet"],
-    answer: 1,
-    explain: "You must park at least 10 feet away from a fire hydrant.",
-  },
-  {
-    q: "Refusing a breath test (Implied Consent) on a first offense results in...",
-    options: [
-      "A warning",
-      "A 180-day license suspension",
-      "A $50 fine only",
-      "No penalty",
-    ],
-    answer: 1,
-    explain: "Refusal triggers an automatic 180-day license suspension on a first offense.",
   },
 ];
 
 if (typeof module !== "undefined") {
-  module.exports = { RULES, QUIZ };
+  module.exports = { UNITS };
 }
