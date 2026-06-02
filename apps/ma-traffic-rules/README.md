@@ -9,7 +9,11 @@ progress tracking. Designed to beat the paid App Store leaders (see
 
 - 🏠 **Learn** — bite-sized lessons on a gamified path with XP, streaks and hearts.
 - 📝 **Exam Simulator** — the real MA RMV format: **25 questions, 25-minute
-  timer, pass at 18/72%**, with a full answer review at the end.
+  timer, pass at 18/72%**, with a full answer review at the end. Plus a
+  **Quick Practice** (10 Q, instant feedback) for low-stakes study.
+- 🏅 **Achievements** — 9 unlockable badges with celebratory toasts.
+- 📲 **Installable PWA** — add to your home screen; a service worker caches the
+  app shell for true offline use (when served over http/https).
 - 🛑 **Road Signs** — crisp vector signs (regulatory / warning / guide) with a
   tap-to-learn gallery and a "Test Me" recognition quiz.
 - 🎯 **Smart Review** — every missed question is remembered for one-tap practice.
@@ -47,6 +51,7 @@ file — open it directly in any mobile browser, no server or network needed.
 | `app.js`                          | Tabs, multi-mode quiz engine, signs, profile, FX, storage  |
 | `data.js`                         | Content: units → lessons → questions, road signs, exam pool |
 | `ma-traffic-rules-standalone.html`| Single-file build for offline / mobile use                 |
+| `manifest.json` · `sw.js` · `icon.svg` | PWA: installability + offline service worker          |
 | `ANALYSIS.md`                     | Competitive analysis & UX strategy                         |
 
 ## Updating the content

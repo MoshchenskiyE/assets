@@ -14,7 +14,7 @@
   const fresh = () => ({
     xp: 0, streak: 1, hearts: MAX_HEARTS, heartsAt: Date.now(),
     completed: {}, mistakes: [], examBest: null, examCount: 0, examPassed: false,
-    dailyXp: 0, dailyKey: todayKey(), lastDay: todayKey(),
+    dailyXp: 0, dailyKey: todayKey(), lastDay: todayKey(), achievements: [],
     settings: { dark: null, sound: true, haptics: true },
   });
 
@@ -66,6 +66,36 @@
   function addXp(n) {
     state.xp += n; state.dailyXp += n; save();
     renderStats(); renderGoalRing();
+  }
+
+  /* ============================ ACHIEVEMENTS ============================ */
+  const unitsAllDone = () => UNITS.some((u) => u.lessons.every((l) => state.completed[l.id]));
+  const ACHIEVEMENTS = [
+    { id: "first", icon: "🚦", title: "First Lesson", desc: "Complete your first lesson", test: (s) => Object.keys(s.completed).length >= 1 },
+    { id: "unit", icon: "🏅", title: "Unit Master", desc: "Finish every lesson in a unit", test: () => unitsAllDone() },
+    { id: "grad", icon: "🎓", title: "Graduate", desc: "Complete all lessons", test: (s) => Object.keys(s.completed).length >= allLessons.length },
+    { id: "pass", icon: "🏆", title: "Licensed!", desc: "Pass the exam simulator", test: (s) => s.examPassed },
+    { id: "perfect", icon: "💯", title: "Perfect Score", desc: "Score 25/25 on the exam", test: (s) => s.examBest === EXAM_SIZE },
+    { id: "streak3", icon: "🔥", title: "On Fire", desc: "Reach a 3-day streak", test: (s) => s.streak >= 3 },
+    { id: "signpro", icon: "🛑", title: "Sign Pro", desc: "Ace a road-sign quiz", test: (s, e) => e.type === "signquiz" && e.acc === 100 },
+    { id: "xp500", icon: "⭐", title: "XP Hunter", desc: "Earn 500 total XP", test: (s) => s.xp >= 500 },
+    { id: "fixer", icon: "🎯", title: "Comeback", desc: "Finish a mistake-review session", test: (s, e) => e.type === "review" },
+  ];
+  function awardAchievements(ev) {
+    ev = ev || {};
+    const newly = [];
+    ACHIEVEMENTS.forEach((a) => {
+      if (state.achievements.includes(a.id)) return;
+      try { if (a.test(state, ev)) { state.achievements.push(a.id); newly.push(a); } } catch (e) {}
+    });
+    if (newly.length) { save(); newly.forEach((a, i) => setTimeout(() => toast(a), i * 650)); }
+  }
+  function toast(a) {
+    const w = $("toastWrap"); if (!w) return;
+    const t = document.createElement("div"); t.className = "toast";
+    t.innerHTML = `<span class="t-ico">${a.icon}</span><div class="t-body"><b>Achievement unlocked!</b><span>${esc(a.title)}</span></div>`;
+    w.appendChild(t); beep(true); buzz(40);
+    setTimeout(() => t.remove(), 3900);
   }
 
   /* ============================ FEEDBACK FX ============================ */
@@ -245,6 +275,10 @@
     const qs = shuffle(examPool()).slice(0, EXAM_SIZE);
     runQuiz({ mode: "exam", questions: qs, title: "Exam Simulator" });
   }
+  $("startPractice").addEventListener("click", () => {
+    const qs = shuffle(examPool()).slice(0, 10);
+    runQuiz({ mode: "practice", questions: qs, title: "Quick Practice" });
+  });
 
   /* ============================ SIGN QUIZ ============================ */
   $("startSignQuiz").addEventListener("click", () => {
@@ -375,6 +409,7 @@
       if (passed) state.examPassed = true;
       addXp(Q.correct * 4);
       save();
+      awardAchievements({ type: "exam", score: Q.correct });
       return showResult(passed ? "exam-pass" : "exam-fail");
     }
 
@@ -384,11 +419,13 @@
       addXp(earned);
       state.completed[Q.lessonId] = Math.max(state.completed[Q.lessonId] || 0, acc);
       save();
+      awardAchievements({ type: "lesson", acc });
       return showResult("lesson", { acc, earned });
     }
-    // review / signquiz
+    // practice / review / signquiz
     const acc = Math.round((Q.correct / Q.questions.length) * 100);
     addXp(Q.correct * 5); save();
+    awardAchievements({ type: Q.mode, acc });
     showResult(Q.mode, { acc });
   }
 
@@ -413,11 +450,13 @@
       sub.textContent = "Great work — keep the streak going.";
       badges.innerHTML = badge("b-gold", "TOTAL XP", "+" + data.earned) + badge("b-blue", "ACCURACY", data.acc + "%");
       confetti = true;
-    } else if (kind === "signquiz" || kind === "review") {
-      emoji.textContent = data.acc >= 80 ? "🌟" : "💪"; title.textContent = kind === "review" ? "Review done!" : "Quiz complete!";
+    } else if (kind === "signquiz" || kind === "review" || kind === "practice") {
+      emoji.textContent = data.acc >= 80 ? "🌟" : "💪";
+      title.textContent = kind === "review" ? "Review done!" : kind === "practice" ? "Practice complete!" : "Quiz complete!";
       title.style.color = "var(--blue-d)";
-      sub.textContent = kind === "review" ? "Nice — fewer mistakes to go." : "Sign mastery is climbing.";
+      sub.textContent = kind === "review" ? "Nice — fewer mistakes to go." : kind === "practice" ? "Keep practicing to lock it in." : "Sign mastery is climbing.";
       badges.innerHTML = badge("b-blue", "ACCURACY", data.acc + "%") + badge("b-green", "CORRECT", Q.correct + "/" + Q.questions.length);
+      review.hidden = false;
       confetti = data.acc >= 80;
     } else if (kind === "exam-pass") {
       emoji.textContent = "🏆"; title.textContent = "You passed!"; title.style.color = "var(--green-d)";
@@ -497,9 +536,37 @@
       ml.appendChild(item);
     });
 
+    const ag = $("achievementsGrid"); ag.innerHTML = "";
+    ACHIEVEMENTS.forEach((a) => {
+      const un = state.achievements.includes(a.id);
+      const d = document.createElement("div"); d.className = "ach " + (un ? "unlocked" : "locked");
+      d.title = a.desc;
+      d.innerHTML = `<span class="ach-ico">${a.icon}</span><span class="ach-title">${esc(a.title)}</span>`;
+      ag.appendChild(d);
+    });
+    $("achCount").textContent = state.achievements.length + "/" + ACHIEVEMENTS.length;
+
     $("setSound").checked = state.settings.sound;
     $("setHaptics").checked = state.settings.haptics;
     applyTheme();
+  }
+
+  /* ============================ PWA: install + offline ============================ */
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault(); deferredPrompt = e;
+    const b = $("installBtn"); if (b) b.hidden = false;
+  });
+  const installBtn = $("installBtn");
+  if (installBtn) installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (e) {}
+    deferredPrompt = null; installBtn.hidden = true;
+  });
+  window.addEventListener("appinstalled", () => { if (installBtn) installBtn.hidden = true; });
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   }
   $("setDark").addEventListener("change", (e) => { state.settings.dark = e.target.checked; save(); applyTheme(); });
   $("setSound").addEventListener("change", (e) => { state.settings.sound = e.target.checked; save(); if (e.target.checked) beep(true); });
@@ -514,4 +581,5 @@
 
   /* ============================ BOOT ============================ */
   applyTheme(); renderStats(); renderGoalRing(); renderPath(); renderGuide(); renderSigns();
+  awardAchievements({ type: "boot" });
 })();

@@ -12,6 +12,8 @@
       content="RoadReady MA — the free, beautiful way to ace the Massachusetts permit test. Lessons, a real-format exam simulator, road signs, and progress tracking."
     />
     <title>RoadReady MA · Ace the Massachusetts Permit Test</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -195,6 +197,31 @@ main { min-height: calc(100vh - 56px); padding-bottom: var(--nav-h); }
 .reset-btn { background: none; border: 2px solid var(--red); color: var(--red); border-radius: 14px; padding: 13px; font-weight: 800; margin-top: 4px; }
 .reset-btn:active { background: var(--red); color: #fff; }
 .disclaimer { color: var(--ink-soft); font-size: .8rem; line-height: 1.5; margin-top: 22px; }
+.btn-practice { width: 100%; margin-top: 12px; }
+
+/* Achievements */
+.ach-count { font-size: .8rem; color: var(--ink-soft); font-weight: 800; }
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px,1fr)); gap: 12px; }
+.ach { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 12px 8px; text-align: center; position: relative; }
+.ach.locked { opacity: .55; }
+.ach.locked .ach-ico { filter: grayscale(1); }
+.ach-ico { font-size: 1.9rem; display: block; }
+.ach-title { font-size: .72rem; font-weight: 800; display: block; margin-top: 5px; line-height: 1.2; }
+.ach.unlocked { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.ach.unlocked::after { content: "✓"; position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: var(--green); color: #fff; border-radius: 50%; font-size: .7rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px var(--shadow); }
+
+/* Install card */
+.install-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 16px; background: var(--card); border: 2px solid var(--blue); border-bottom-width: 4px; border-radius: 16px; padding: 14px; }
+.install-card:active { transform: translateY(2px); }
+.ic-ico { font-size: 1.7rem; } .ic-body { flex: 1; } .ic-body b { display: block; } .ic-body span { font-size: .82rem; color: var(--ink-soft); }
+
+/* Toasts */
+.toast-wrap { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + 12px); z-index: 90; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; padding: 0 12px; }
+.toast { display: flex; align-items: center; gap: 12px; background: var(--card); border: 2px solid var(--gold); border-radius: 16px; padding: 12px 16px; box-shadow: 0 8px 24px var(--shadow); max-width: 420px; width: 100%; animation: toastin .4s cubic-bezier(.2,.9,.3,1), toastout .4s ease 3.2s forwards; }
+.toast .t-ico { font-size: 1.9rem; }
+.toast .t-body b { display: block; font-size: .95rem; } .toast .t-body span { font-size: .82rem; color: var(--ink-soft); }
+@keyframes toastin { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes toastout { to { transform: translateY(40px); opacity: 0; } }
 
 /* ===================================================================
    BOTTOM NAV
@@ -337,6 +364,7 @@ main { min-height: calc(100vh - 56px); padding-bottom: var(--nav-h); }
             <p>Real MA RMV format: <b>25 questions</b>, <b>25 minutes</b>, pass at
               <b>18 correct (72%)</b>. No hints — just like the real thing.</p>
             <button class="btn3d btn-blue" id="startExam">START EXAM</button>
+            <button class="btn3d btn-ghost btn-practice" id="startPractice">QUICK PRACTICE · 10 Q</button>
           </div>
 
           <div class="stat-row">
@@ -389,6 +417,15 @@ main { min-height: calc(100vh - 56px); padding-bottom: var(--nav-h); }
             <div class="kpi"><span class="kpi-ico">✅</span><span class="kpi-num" id="kpiLessons">0</span><span class="kpi-lab">Lessons</span></div>
             <div class="kpi"><span class="kpi-ico">🏆</span><span class="kpi-num" id="kpiExam">—</span><span class="kpi-lab">Best exam</span></div>
           </div>
+
+          <h3 class="section-title sm">Achievements <span id="achCount" class="ach-count"></span></h3>
+          <div id="achievementsGrid" class="ach-grid"></div>
+
+          <button class="install-card" id="installBtn" hidden>
+            <span class="ic-ico">📲</span>
+            <span class="ic-body"><b>Install RoadReady MA</b><span>Add to your home screen — works offline.</span></span>
+            <span class="rc-chev">›</span>
+          </button>
 
           <h3 class="section-title sm">Mastery by unit</h3>
           <div id="masteryList" class="mastery-list"></div>
@@ -476,6 +513,9 @@ main { min-height: calc(100vh - 56px); padding-bottom: var(--nav-h); }
         <div id="reviewList" class="review-list"></div>
       </div>
     </div>
+
+    <!-- Achievement toasts -->
+    <div class="toast-wrap" id="toastWrap"></div>
     <script>
 /*
  * Massachusetts Driving — gamified course data (Duolingo-style).
@@ -1214,7 +1254,7 @@ if (typeof module !== "undefined") {
   const fresh = () => ({
     xp: 0, streak: 1, hearts: MAX_HEARTS, heartsAt: Date.now(),
     completed: {}, mistakes: [], examBest: null, examCount: 0, examPassed: false,
-    dailyXp: 0, dailyKey: todayKey(), lastDay: todayKey(),
+    dailyXp: 0, dailyKey: todayKey(), lastDay: todayKey(), achievements: [],
     settings: { dark: null, sound: true, haptics: true },
   });
 
@@ -1266,6 +1306,36 @@ if (typeof module !== "undefined") {
   function addXp(n) {
     state.xp += n; state.dailyXp += n; save();
     renderStats(); renderGoalRing();
+  }
+
+  /* ============================ ACHIEVEMENTS ============================ */
+  const unitsAllDone = () => UNITS.some((u) => u.lessons.every((l) => state.completed[l.id]));
+  const ACHIEVEMENTS = [
+    { id: "first", icon: "🚦", title: "First Lesson", desc: "Complete your first lesson", test: (s) => Object.keys(s.completed).length >= 1 },
+    { id: "unit", icon: "🏅", title: "Unit Master", desc: "Finish every lesson in a unit", test: () => unitsAllDone() },
+    { id: "grad", icon: "🎓", title: "Graduate", desc: "Complete all lessons", test: (s) => Object.keys(s.completed).length >= allLessons.length },
+    { id: "pass", icon: "🏆", title: "Licensed!", desc: "Pass the exam simulator", test: (s) => s.examPassed },
+    { id: "perfect", icon: "💯", title: "Perfect Score", desc: "Score 25/25 on the exam", test: (s) => s.examBest === EXAM_SIZE },
+    { id: "streak3", icon: "🔥", title: "On Fire", desc: "Reach a 3-day streak", test: (s) => s.streak >= 3 },
+    { id: "signpro", icon: "🛑", title: "Sign Pro", desc: "Ace a road-sign quiz", test: (s, e) => e.type === "signquiz" && e.acc === 100 },
+    { id: "xp500", icon: "⭐", title: "XP Hunter", desc: "Earn 500 total XP", test: (s) => s.xp >= 500 },
+    { id: "fixer", icon: "🎯", title: "Comeback", desc: "Finish a mistake-review session", test: (s, e) => e.type === "review" },
+  ];
+  function awardAchievements(ev) {
+    ev = ev || {};
+    const newly = [];
+    ACHIEVEMENTS.forEach((a) => {
+      if (state.achievements.includes(a.id)) return;
+      try { if (a.test(state, ev)) { state.achievements.push(a.id); newly.push(a); } } catch (e) {}
+    });
+    if (newly.length) { save(); newly.forEach((a, i) => setTimeout(() => toast(a), i * 650)); }
+  }
+  function toast(a) {
+    const w = $("toastWrap"); if (!w) return;
+    const t = document.createElement("div"); t.className = "toast";
+    t.innerHTML = `<span class="t-ico">${a.icon}</span><div class="t-body"><b>Achievement unlocked!</b><span>${esc(a.title)}</span></div>`;
+    w.appendChild(t); beep(true); buzz(40);
+    setTimeout(() => t.remove(), 3900);
   }
 
   /* ============================ FEEDBACK FX ============================ */
@@ -1445,6 +1515,10 @@ if (typeof module !== "undefined") {
     const qs = shuffle(examPool()).slice(0, EXAM_SIZE);
     runQuiz({ mode: "exam", questions: qs, title: "Exam Simulator" });
   }
+  $("startPractice").addEventListener("click", () => {
+    const qs = shuffle(examPool()).slice(0, 10);
+    runQuiz({ mode: "practice", questions: qs, title: "Quick Practice" });
+  });
 
   /* ============================ SIGN QUIZ ============================ */
   $("startSignQuiz").addEventListener("click", () => {
@@ -1575,6 +1649,7 @@ if (typeof module !== "undefined") {
       if (passed) state.examPassed = true;
       addXp(Q.correct * 4);
       save();
+      awardAchievements({ type: "exam", score: Q.correct });
       return showResult(passed ? "exam-pass" : "exam-fail");
     }
 
@@ -1584,11 +1659,13 @@ if (typeof module !== "undefined") {
       addXp(earned);
       state.completed[Q.lessonId] = Math.max(state.completed[Q.lessonId] || 0, acc);
       save();
+      awardAchievements({ type: "lesson", acc });
       return showResult("lesson", { acc, earned });
     }
-    // review / signquiz
+    // practice / review / signquiz
     const acc = Math.round((Q.correct / Q.questions.length) * 100);
     addXp(Q.correct * 5); save();
+    awardAchievements({ type: Q.mode, acc });
     showResult(Q.mode, { acc });
   }
 
@@ -1613,11 +1690,13 @@ if (typeof module !== "undefined") {
       sub.textContent = "Great work — keep the streak going.";
       badges.innerHTML = badge("b-gold", "TOTAL XP", "+" + data.earned) + badge("b-blue", "ACCURACY", data.acc + "%");
       confetti = true;
-    } else if (kind === "signquiz" || kind === "review") {
-      emoji.textContent = data.acc >= 80 ? "🌟" : "💪"; title.textContent = kind === "review" ? "Review done!" : "Quiz complete!";
+    } else if (kind === "signquiz" || kind === "review" || kind === "practice") {
+      emoji.textContent = data.acc >= 80 ? "🌟" : "💪";
+      title.textContent = kind === "review" ? "Review done!" : kind === "practice" ? "Practice complete!" : "Quiz complete!";
       title.style.color = "var(--blue-d)";
-      sub.textContent = kind === "review" ? "Nice — fewer mistakes to go." : "Sign mastery is climbing.";
+      sub.textContent = kind === "review" ? "Nice — fewer mistakes to go." : kind === "practice" ? "Keep practicing to lock it in." : "Sign mastery is climbing.";
       badges.innerHTML = badge("b-blue", "ACCURACY", data.acc + "%") + badge("b-green", "CORRECT", Q.correct + "/" + Q.questions.length);
+      review.hidden = false;
       confetti = data.acc >= 80;
     } else if (kind === "exam-pass") {
       emoji.textContent = "🏆"; title.textContent = "You passed!"; title.style.color = "var(--green-d)";
@@ -1697,9 +1776,37 @@ if (typeof module !== "undefined") {
       ml.appendChild(item);
     });
 
+    const ag = $("achievementsGrid"); ag.innerHTML = "";
+    ACHIEVEMENTS.forEach((a) => {
+      const un = state.achievements.includes(a.id);
+      const d = document.createElement("div"); d.className = "ach " + (un ? "unlocked" : "locked");
+      d.title = a.desc;
+      d.innerHTML = `<span class="ach-ico">${a.icon}</span><span class="ach-title">${esc(a.title)}</span>`;
+      ag.appendChild(d);
+    });
+    $("achCount").textContent = state.achievements.length + "/" + ACHIEVEMENTS.length;
+
     $("setSound").checked = state.settings.sound;
     $("setHaptics").checked = state.settings.haptics;
     applyTheme();
+  }
+
+  /* ============================ PWA: install + offline ============================ */
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault(); deferredPrompt = e;
+    const b = $("installBtn"); if (b) b.hidden = false;
+  });
+  const installBtn = $("installBtn");
+  if (installBtn) installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (e) {}
+    deferredPrompt = null; installBtn.hidden = true;
+  });
+  window.addEventListener("appinstalled", () => { if (installBtn) installBtn.hidden = true; });
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   }
   $("setDark").addEventListener("change", (e) => { state.settings.dark = e.target.checked; save(); applyTheme(); });
   $("setSound").addEventListener("change", (e) => { state.settings.sound = e.target.checked; save(); if (e.target.checked) beep(true); });
@@ -1714,6 +1821,7 @@ if (typeof module !== "undefined") {
 
   /* ============================ BOOT ============================ */
   applyTheme(); renderStats(); renderGoalRing(); renderPath(); renderGuide(); renderSigns();
+  awardAchievements({ type: "boot" });
 })();
 
     </script>

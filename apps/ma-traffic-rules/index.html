@@ -12,6 +12,8 @@
       content="RoadReady MA — the free, beautiful way to ace the Massachusetts permit test. Lessons, a real-format exam simulator, road signs, and progress tracking."
     />
     <title>RoadReady MA · Ace the Massachusetts Permit Test</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -63,6 +65,7 @@
             <p>Real MA RMV format: <b>25 questions</b>, <b>25 minutes</b>, pass at
               <b>18 correct (72%)</b>. No hints — just like the real thing.</p>
             <button class="btn3d btn-blue" id="startExam">START EXAM</button>
+            <button class="btn3d btn-ghost btn-practice" id="startPractice">QUICK PRACTICE · 10 Q</button>
           </div>
 
           <div class="stat-row">
@@ -115,6 +118,15 @@
             <div class="kpi"><span class="kpi-ico">✅</span><span class="kpi-num" id="kpiLessons">0</span><span class="kpi-lab">Lessons</span></div>
             <div class="kpi"><span class="kpi-ico">🏆</span><span class="kpi-num" id="kpiExam">—</span><span class="kpi-lab">Best exam</span></div>
           </div>
+
+          <h3 class="section-title sm">Achievements <span id="achCount" class="ach-count"></span></h3>
+          <div id="achievementsGrid" class="ach-grid"></div>
+
+          <button class="install-card" id="installBtn" hidden>
+            <span class="ic-ico">📲</span>
+            <span class="ic-body"><b>Install RoadReady MA</b><span>Add to your home screen — works offline.</span></span>
+            <span class="rc-chev">›</span>
+          </button>
 
           <h3 class="section-title sm">Mastery by unit</h3>
           <div id="masteryList" class="mastery-list"></div>
@@ -202,6 +214,9 @@
         <div id="reviewList" class="review-list"></div>
       </div>
     </div>
+
+    <!-- Achievement toasts -->
+    <div class="toast-wrap" id="toastWrap"></div>
 
     <script src="data.js"></script>
     <script src="app.js"></script>
