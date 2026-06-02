@@ -44,6 +44,7 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }  /* the hidden attribute must always win over class display rules */
 html { scroll-behavior: smooth; }
 body {
   margin: 0; font-family: var(--font); font-weight: 700; color: var(--ink);
